@@ -839,6 +839,77 @@ async function adminLogout() {
   showToast('Session administrateur fermee.');
 }
 
+async function changeAdminPassword() {
+  const currentPass = document.getElementById('sec-current-pass');
+  const newPass = document.getElementById('sec-new-pass');
+  const confirmPass = document.getElementById('sec-confirm-pass');
+
+  if (!currentPass || !newPass || !confirmPass) return;
+
+  const current = currentPass.value.trim();
+  const next = newPass.value.trim();
+  const confirm = confirmPass.value.trim();
+
+  if (!current) { showToast('Saisissez votre mot de passe actuel.'); return; }
+  if (next.length < 12) { showToast('Le nouveau mot de passe doit faire au moins 12 caractères.'); return; }
+  if (next !== confirm) { showToast('Les deux mots de passe ne correspondent pas.'); return; }
+
+  try {
+    await api('/api/admin/change-password', {
+      method: 'POST',
+      body: JSON.stringify({ currentPassword: current, newPassword: next }),
+    });
+    currentPass.value = '';
+    newPass.value = '';
+    confirmPass.value = '';
+    showToast('Mot de passe changé. Reconnectez-vous.');
+    await refreshAdminStatus();
+    closeAdminDashboard();
+  } catch (err) {
+    if (err.status === 401) {
+      showToast('Mot de passe actuel incorrect.');
+    } else if (err.status === 400) {
+      showToast('Le nouveau mot de passe doit faire au moins 12 caractères.');
+    } else {
+      showToast('Erreur lors du changement de mot de passe.');
+    }
+  }
+}
+
+function initPasswordStrength() {
+  const input = document.getElementById('sec-new-pass');
+  const bar = document.getElementById('sec-strength-bar');
+  const fill = document.getElementById('sec-strength-fill');
+  const label = document.getElementById('sec-strength-label');
+  if (!input || !bar || !fill || !label) return;
+
+  input.addEventListener('input', () => {
+    const v = input.value;
+    if (!v) { bar.style.display = 'none'; label.textContent = ''; return; }
+    bar.style.display = 'block';
+
+    let score = 0;
+    if (v.length >= 12) score++;
+    if (v.length >= 16) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+
+    const levels = [
+      { pct: '20%', color: '#e53e3e', txt: 'Très faible' },
+      { pct: '40%', color: '#dd6b20', txt: 'Faible' },
+      { pct: '60%', color: '#d69e2e', txt: 'Moyen' },
+      { pct: '80%', color: '#38a169', txt: 'Fort' },
+      { pct: '100%', color: '#2f855a', txt: 'Très fort' },
+    ];
+    const lvl = levels[Math.min(score, 4)];
+    fill.style.width = lvl.pct;
+    fill.style.background = lvl.color;
+    label.textContent = lvl.txt;
+    label.style.color = lvl.color;
+  });
+}
+
 function openAdminDashboard() {
   const loginCard = document.getElementById('admin-login-card');
   const dashboard = document.getElementById('admin-dashboard');
@@ -904,6 +975,7 @@ async function loadAdminDashboard() {
     checkLiveStatus();
     await loadPushStats();
     await loadPushSchedule();
+    initPasswordStrength();
   } catch (err) {
     if (err.status === 401) {
       await refreshAdminStatus();

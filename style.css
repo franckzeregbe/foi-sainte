@@ -1286,6 +1286,21 @@ nav {
   font-style: italic;
 }
 
+/* Barre de force du mot de passe */
+.sec-strength-bar {
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 999px;
+  margin-bottom: 0.4rem;
+  overflow: hidden;
+}
+.sec-strength-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s, background 0.3s;
+  width: 0%;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

@@ -431,7 +431,7 @@ app.post('/api/admin/setup', authLimiter, async (req, res) => {
   }
 
   const password = String(req.body?.password || '').trim();
-  if (password.length < 6) {
+  if (password.length < 12) {
     return res.status(400).json({ error: 'PASSWORD_TOO_SHORT' });
   }
 
@@ -459,6 +459,32 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
 });
 
 app.post('/api/admin/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.clearCookie('foi_admin_sid');
+    res.json({ ok: true });
+  });
+});
+
+app.post('/api/admin/change-password', requireAdmin, authLimiter, async (req, res) => {
+  const currentPassword = String(req.body?.currentPassword || '').trim();
+  const newPassword = String(req.body?.newPassword || '').trim();
+
+  if (newPassword.length < 12) {
+    return res.status(400).json({ error: 'PASSWORD_TOO_SHORT' });
+  }
+
+  const admin = db.prepare('SELECT id, password_hash FROM admins LIMIT 1').get();
+  if (!admin) return res.status(409).json({ error: 'NOT_SETUP' });
+
+  const valid = await bcrypt.compare(currentPassword, admin.password_hash);
+  if (!valid) {
+    return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
+  }
+
+  const hash = await bcrypt.hash(newPassword, 12);
+  db.prepare('UPDATE admins SET password_hash = ? WHERE id = ?').run(hash, admin.id);
+
+  // Invalider la session courante pour forcer une reconnexion
   req.session.destroy(() => {
     res.clearCookie('foi_admin_sid');
     res.json({ ok: true });

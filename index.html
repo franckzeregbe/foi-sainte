@@ -349,6 +349,9 @@
             <button class="admin-sidenav-item" onclick="showAdminPanel('stats', this)">
               <i class="fa-solid fa-chart-line"></i> Statistiques
             </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('securite', this)">
+              <i class="fa-solid fa-shield-halved"></i> Sécurité
+            </button>
           </nav>
           <button class="btn-secondary admin-logout-btn" onclick="adminLogout()">
             <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
@@ -550,6 +553,27 @@
                 <button class="btn-secondary" onclick="exportCSV('prayers')">⬇ Exporter prières (CSV)</button>
                 <button class="btn-secondary" onclick="exportCSV('replays')">⬇ Exporter replays (CSV)</button>
               </div>
+            </div>
+          </div>
+
+          <!-- Panneau : Sécurité -->
+          <div class="admin-panel" id="admin-panel-securite">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-shield-halved"></i> Changer le mot de passe admin</h3>
+              <p class="admin-help">Minimum 12 caractères. Après le changement, vous serez déconnecté et devrez vous reconnecter avec le nouveau mot de passe.</p>
+              <label for="sec-current-pass">Mot de passe actuel</label>
+              <input id="sec-current-pass" type="password" placeholder="Mot de passe actuel" maxlength="100" autocomplete="current-password" />
+              <label for="sec-new-pass">Nouveau mot de passe</label>
+              <input id="sec-new-pass" type="password" placeholder="Minimum 12 caractères" maxlength="100" autocomplete="new-password" />
+              <label for="sec-confirm-pass">Confirmer le nouveau mot de passe</label>
+              <input id="sec-confirm-pass" type="password" placeholder="Répétez le nouveau mot de passe" maxlength="100" autocomplete="new-password" />
+              <div id="sec-strength-bar" class="sec-strength-bar" style="display:none">
+                <div id="sec-strength-fill" class="sec-strength-fill"></div>
+              </div>
+              <small id="sec-strength-label" class="admin-help" style="margin-bottom:.8rem;display:block"></small>
+              <button class="btn-primary" onclick="changeAdminPassword()">
+                <i class="fa-solid fa-key"></i> Changer le mot de passe
+              </button>
             </div>
           </div>
 
