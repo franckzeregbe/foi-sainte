@@ -301,20 +301,23 @@ nav {
 .hero-clock {
   display: inline-flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.25rem;
-  padding: 0.7rem 1rem;
-  margin-bottom: 1.1rem;
+  padding: 0.5rem 0.7rem;
+  margin-bottom: 0;
   border-radius: 12px;
   border: 1px solid rgba(212, 175, 55, 0.3);
   background: rgba(5, 14, 28, 0.58);
   backdrop-filter: blur(8px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  position: absolute;
+  top: 0.8rem;
+  left: 0.8rem;
 }
 
 .hero-clock-label {
   color: var(--gold-300);
-  font-size: 0.72rem;
+  font-size: 0.64rem;
   letter-spacing: 1.2px;
   text-transform: uppercase;
   opacity: 0.95;
@@ -323,15 +326,15 @@ nav {
 .hero-clock-time {
   font-family: var(--font-serif);
   color: #f7f3e8;
-  font-size: clamp(1.2rem, 3vw, 1.6rem);
-  letter-spacing: 2px;
+  font-size: clamp(0.95rem, 2.3vw, 1.2rem);
+  letter-spacing: 1.2px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .hero-clock-date {
   color: var(--text-soft);
-  font-size: 0.83rem;
+  font-size: 0.72rem;
   text-transform: capitalize;
 }
 
@@ -2143,6 +2146,20 @@ footer {
 @media (max-width: 600px) {
   #header {
     padding: 0 1rem;
+  }
+
+  .hero-clock {
+    top: 0.55rem;
+    left: 0.55rem;
+    padding: 0.42rem 0.58rem;
+  }
+
+  .hero-clock-label {
+    font-size: 0.58rem;
+  }
+
+  .hero-clock-date {
+    font-size: 0.66rem;
   }
 
   .hero-title {
