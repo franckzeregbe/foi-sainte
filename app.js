@@ -73,6 +73,7 @@ const CHAT_NAME_KEY = 'foisainte_chat_name';
 
 document.addEventListener('DOMContentLoaded', async () => {
   initAgenda();
+  initHomeClock();
   initCharCount();
   initLiveChat();
   handleHashNav();
@@ -148,6 +149,30 @@ function handleHashNav() {
     const link = document.querySelector(`[href="#${hash}"]`);
     showSection(hash, link);
   }
+}
+
+function initHomeClock() {
+  const timeEl = document.getElementById('hero-clock-time');
+  const dateEl = document.getElementById('hero-clock-date');
+  if (!timeEl || !dateEl) return;
+
+  const updateClock = () => {
+    const now = new Date();
+    timeEl.textContent = now.toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    });
+    dateEl.textContent = now.toLocaleDateString('fr-FR', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
+  updateClock();
+  setInterval(updateClock, 1000);
 }
 
 function initAgenda() {

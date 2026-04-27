@@ -298,6 +298,43 @@ nav {
   text-shadow: 0 3px 16px rgba(0, 0, 0, 0.6);
 }
 
+.hero-clock {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.7rem 1rem;
+  margin-bottom: 1.1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  background: rgba(5, 14, 28, 0.58);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+.hero-clock-label {
+  color: var(--gold-300);
+  font-size: 0.72rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  opacity: 0.95;
+}
+
+.hero-clock-time {
+  font-family: var(--font-serif);
+  color: #f7f3e8;
+  font-size: clamp(1.2rem, 3vw, 1.6rem);
+  letter-spacing: 2px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-clock-date {
+  color: var(--text-soft);
+  font-size: 0.83rem;
+  text-transform: capitalize;
+}
+
 /* Watermarks — désactivés */
 .flame-watermark,
 .hero-flame,
