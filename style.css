@@ -303,16 +303,16 @@ nav {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.15rem;
-  padding: 0.42rem 0.62rem;
+  padding: 0.5rem 0.75rem;
   margin-bottom: 0;
   border-radius: 11px;
-  border: 1px solid rgba(212, 175, 55, 0.36);
-  background: linear-gradient(145deg, rgba(8, 20, 40, 0.9) 0%, rgba(16, 32, 58, 0.76) 100%);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(56, 189, 162, 0.45);
+  background: linear-gradient(145deg, rgba(4, 38, 34, 0.92) 0%, rgba(8, 60, 52, 0.82) 100%);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(56, 189, 162, 0.15);
   position: absolute;
-  top: clamp(0.7rem, 2vw, 1.1rem);
-  left: clamp(0.7rem, 2vw, 1.1rem);
+  bottom: clamp(1.2rem, 4vw, 2rem);
+  left: clamp(1rem, 3vw, 2rem);
   min-width: 150px;
   z-index: 4;
   isolation: isolate;
@@ -321,32 +321,32 @@ nav {
 .hero-clock::after {
   content: '';
   position: absolute;
-  inset: -7px;
+  inset: -6px;
   border-radius: 14px;
-  background: rgba(5, 16, 34, 0.34);
+  background: rgba(4, 28, 24, 0.35);
   filter: blur(8px);
   z-index: -1;
 }
 
 .hero-clock-label {
-  color: var(--gold-300);
+  color: #5ee7ce;
   font-size: 0.6rem;
   letter-spacing: 1.05px;
   text-transform: uppercase;
-  opacity: 0.95;
+  opacity: 0.9;
 }
 
 .hero-clock-time {
   font-family: var(--font-serif);
-  color: #f7f3e8;
-  font-size: clamp(0.9rem, 2.1vw, 1.1rem);
+  color: #d4f5ef;
+  font-size: clamp(0.95rem, 2.1vw, 1.15rem);
   letter-spacing: 0.9px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .hero-clock-date {
-  color: var(--text-soft);
+  color: #8dd8cc;
   font-size: 0.67rem;
   text-transform: capitalize;
 }
@@ -2162,9 +2162,9 @@ footer {
   }
 
   .hero-clock {
-    top: 0.45rem;
-    left: 0.45rem;
-    padding: 0.36rem 0.5rem;
+    bottom: 0.8rem;
+    left: 0.6rem;
+    padding: 0.38rem 0.52rem;
     min-width: 130px;
   }
 
