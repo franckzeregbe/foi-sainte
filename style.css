@@ -302,23 +302,36 @@ nav {
   display: inline-flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.25rem;
-  padding: 0.5rem 0.7rem;
+  gap: 0.15rem;
+  padding: 0.42rem 0.62rem;
   margin-bottom: 0;
-  border-radius: 12px;
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  background: rgba(5, 14, 28, 0.58);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  border-radius: 11px;
+  border: 1px solid rgba(212, 175, 55, 0.36);
+  background: linear-gradient(145deg, rgba(8, 20, 40, 0.9) 0%, rgba(16, 32, 58, 0.76) 100%);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.08);
   position: absolute;
-  top: 0.8rem;
-  left: 0.8rem;
+  top: clamp(0.7rem, 2vw, 1.1rem);
+  left: clamp(0.7rem, 2vw, 1.1rem);
+  min-width: 150px;
+  z-index: 4;
+  isolation: isolate;
+}
+
+.hero-clock::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: 14px;
+  background: rgba(5, 16, 34, 0.34);
+  filter: blur(8px);
+  z-index: -1;
 }
 
 .hero-clock-label {
   color: var(--gold-300);
-  font-size: 0.64rem;
-  letter-spacing: 1.2px;
+  font-size: 0.6rem;
+  letter-spacing: 1.05px;
   text-transform: uppercase;
   opacity: 0.95;
 }
@@ -326,15 +339,15 @@ nav {
 .hero-clock-time {
   font-family: var(--font-serif);
   color: #f7f3e8;
-  font-size: clamp(0.95rem, 2.3vw, 1.2rem);
-  letter-spacing: 1.2px;
+  font-size: clamp(0.9rem, 2.1vw, 1.1rem);
+  letter-spacing: 0.9px;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
 .hero-clock-date {
   color: var(--text-soft);
-  font-size: 0.72rem;
+  font-size: 0.67rem;
   text-transform: capitalize;
 }
 
@@ -2149,17 +2162,18 @@ footer {
   }
 
   .hero-clock {
-    top: 0.55rem;
-    left: 0.55rem;
-    padding: 0.42rem 0.58rem;
+    top: 0.45rem;
+    left: 0.45rem;
+    padding: 0.36rem 0.5rem;
+    min-width: 130px;
   }
 
   .hero-clock-label {
-    font-size: 0.58rem;
+    font-size: 0.53rem;
   }
 
   .hero-clock-date {
-    font-size: 0.66rem;
+    font-size: 0.61rem;
   }
 
   .hero-title {
