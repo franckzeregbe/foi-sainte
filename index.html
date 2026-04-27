@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Église FOI SAINTE – Culte en Ligne</title>
+  <meta name="description" content="Suivez le culte en direct, priez et participez à la vie de l'Église FOI SAINTE depuis n'importe où. Jude 1:20-21" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#c8a951" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+</head>
+<body>
+
+<!-- ─── HEADER ─────────────────────────────────────────────── -->
+<header id="header">
+  <div class="header-inner">
+    <div class="logo-block">
+      <img src="logo-foi-sainte.jpg" alt="Église FOI SAINTE" class="logo-img" />
+      <div class="logo-text">
+        <span class="logo-eglise">Église</span>
+        <span class="logo-nom">FOI SAINTE</span>
+      </div>
+    </div>
+    <nav id="nav">
+      <a href="#accueil" class="nav-link active" onclick="showSection('accueil',this)">Accueil</a>
+      <a href="#live" class="nav-link" onclick="showSection('live',this)">Culte en Direct</a>
+      <a href="#replays" class="nav-link" onclick="showSection('replays',this)">Revoir le Culte</a>
+      <a href="#priere" class="nav-link" onclick="showSection('priere',this)">Espace de Prière</a>
+      <a href="#don" class="nav-link" onclick="showSection('don',this)">Faire un Don</a>
+      <a href="#admin" class="nav-link nav-link-admin" onclick="showSection('admin',this)">Administration</a>
+    </nav>
+    <button class="nav-toggle" onclick="toggleMenu()" aria-label="Menu">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+  </div>
+</header>
+
+<!-- ─── NOTIFICATION BAR ───────────────────────────────────── -->
+<div id="notif-bar" class="notif-bar" style="display:none">
+  <i class="fa-solid fa-circle-dot blink"></i>
+  <span id="notif-text"></span>
+  <button onclick="document.getElementById('notif-bar').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 1 — ACCUEIL
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-accueil" class="section active">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-bienvenue">BIENVENUE AU</p>
+      <h1 class="hero-title">CULTE EN LIGNE !</h1>
+
+      <!-- Verset du Jour -->
+      <div class="verset-card">
+        <p class="verset-label"><i class="fa-solid fa-book-open"></i> Verset du Jour</p>
+        <blockquote id="verset-texte" class="verset-texte"></blockquote>
+        <cite id="verset-ref" class="verset-ref"></cite>
+      </div>
+
+      <!-- Live badge -->
+      <div id="live-badge" class="live-badge" style="display:none">
+        <span class="dot-live"></span> EN DIRECT – <span id="viewers-count">0</span> en ligne
+      </div>
+
+      <!-- CTAs -->
+      <div class="hero-ctas">
+        <button class="btn-primary btn-live-pulse" onclick="showSection('live', document.querySelector('[href=\'#live\']'))">
+          <i class="fa-solid fa-circle-play"></i> Participer au Culte EN DIRECT
+        </button>
+        <button class="btn-secondary" onclick="showSection('replays', document.querySelector('[href=\'#replays\']'))">
+          <i class="fa-regular fa-clock"></i> Revoir le Culte
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Links Bar -->
+  <div class="quick-bar">
+    <!-- Filigrane flamme dans hero -->
+    <div class="flame-watermark hero-flame" aria-hidden="true"></div>
+    <button class="quick-item" onclick="showSection('priere', document.querySelector('[href=\'#priere\']'))">
+      <div class="quick-icon-wrap">
+        <i class="fa-solid fa-person-praying"></i>
+      </div>
+      <div>
+        <strong>Espace de Prière</strong>
+        <small>Déposer une intention</small>
+      </div>
+    </button>
+    <button class="quick-item" onclick="showSection('don', document.querySelector('[href=\'#don\']'))">
+      <div class="quick-icon-wrap">
+        <i class="fa-solid fa-hand-holding-heart"></i>
+      </div>
+      <div>
+        <strong>Faire un Don</strong>
+        <small>Soutenir la mission</small>
+      </div>
+    </button>
+    <div class="quick-item quick-social">
+      <div class="quick-icon-wrap">
+        <i class="fa-solid fa-earth-africa"></i>
+      </div>
+        <strong>Suivez-nous</strong>
+        <div class="social-links">
+          <a href="https://youtube.com/@EgliseFoiSainte" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+          <a href="https://www.facebook.com/EgliseFOISAINTE/" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://twitter.com/EgliseFoiSainte" target="_blank" title="Twitter/X"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="https://wa.me/2250789362185" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prochains Cultes -->
+  <div class="container section-block">
+    <h2 class="section-title"><i class="fa-regular fa-calendar"></i> Prochains Cultes</h2>
+    <div class="agenda-grid" id="agenda-grid"></div>
+  </div>
+
+  <!-- Verset de l'Église -->
+  <div class="eglise-verset-banner">
+    <div class="flame-watermark banner-flame" aria-hidden="true"></div>
+    <div class="evb-inner">
+      <p class="evb-label"><i class="fa-solid fa-book-bible"></i> Verset de l'Église</p>
+      <blockquote class="evb-texte">
+        « Mais vous, bien-aimés, vous édifiant vous-mêmes sur votre très sainte foi, et priant par le Saint-Esprit, conservez-vous dans l'amour de Dieu, en attendant la miséricorde de notre Seigneur Jésus-Christ pour la vie éternelle. »
+      </blockquote>
+      <cite class="evb-ref">— Jude 1 : 20-21 —</cite>
+    </div>
+  </div>
+
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 2 — CULTE EN DIRECT
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-live" class="section">
+  <div class="container">
+    <div class="live-header">
+      <h2 class="section-title"><span class="dot-live"></span> CULTE EN DIRECT</h2>
+    </div>
+    <div class="flame-watermark live-flame" aria-hidden="true"></div>
+
+    <div class="live-grid">
+      <!-- Player -->
+      <div class="live-player-wrap">
+        <div class="live-player" id="live-player">
+          <!-- Flux live configurable depuis l'administration -->
+          <iframe id="yt-live-frame"
+            src=""
+            title="Culte en Direct – Église FOI SAINTE"
+            frameborder="0"
+            allow="autoplay; encrypted-media; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+
+        <!-- Verset en direct -->
+        <div class="live-verset-bar">
+          <span class="live-verset-label"><i class="fa-solid fa-book-open"></i> Verset du moment :</span>
+          <span id="live-verset-display"></span>
+        </div>
+
+        <!-- Boutons live -->
+        <div class="live-actions">
+          <button class="btn-live-action btn-chat-toggle" onclick="toggleChat()">
+            <i class="fa-solid fa-comments"></i> Tchat en Direct
+          </button>
+          <button class="btn-live-action btn-priere-live" onclick="showSection('priere', document.querySelector('[href=\'#priere\']'))">
+            <i class="fa-solid fa-hands-praying"></i> Demande de Prière
+          </button>
+          <button class="btn-live-action btn-don-live" onclick="showSection('don', document.querySelector('[href=\'#don\']'))">
+            <i class="fa-solid fa-heart"></i> Faire un Don
+          </button>
+        </div>
+      </div>
+
+      <!-- Tchat -->
+      <div class="live-chat-panel" id="live-chat-panel">
+        <div class="chat-header">
+          <i class="fa-solid fa-comments"></i> Tchat en Direct
+          <span id="chat-count" class="chat-count">0 connecté(s)</span>
+        </div>
+        <div class="chat-messages" id="chat-messages"></div>
+        <div class="chat-name-row">
+          <input type="text" id="chat-name" placeholder="Votre prénom" maxlength="40" />
+        </div>
+        <div class="chat-input-row">
+          <input type="text" id="chat-input" placeholder="Écrivez Amen, Gloire à Dieu…" maxlength="120"
+            onkeydown="if(event.key==='Enter') sendChatMessage()" />
+          <button onclick="sendChatMessage()" class="btn-chat-send">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </div>
+        <p class="chat-disclaimer">Respectez la fraternité ✝️ — messages modérés</p>
+      </div>
+    </div>
+
+
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 3 — REPLAYS
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-replays" class="section">
+  <div class="container">
+    <h2 class="section-title"><i class="fa-solid fa-film"></i> Revoir le Culte</h2>
+    <p class="section-subtitle">Retrouvez tous nos cultes en replay ci-dessous.</p>
+    <div class="replay-grid" id="replay-grid"></div>
+
+    <div class="replay-cta">
+      <a href="https://youtube.com/@EgliseFoiSainte" target="_blank" class="btn-primary">
+        <i class="fa-brands fa-youtube"></i> Voir toutes les vidéos sur YouTube
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 4 — ESPACE DE PRIÈRE
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-priere" class="section">
+  <div class="container">
+    <div class="priere-header">
+      <i class="fa-solid fa-hands-praying priere-icon"></i>
+      <h2 class="section-title">ESPACE DE PRIÈRE</h2>
+      <p class="section-subtitle">Déposez votre intention de prière — <em>Nous prions pour vous !</em></p>
+    </div>
+
+    <div class="priere-grid">
+      <!-- Formulaire -->
+      <div class="priere-form-card">
+        <h3><i class="fa-solid fa-pen-to-square"></i> Déposez votre intention</h3>
+        <form id="priere-form" onsubmit="submitPriere(event)">
+          <div class="form-group">
+            <label for="prenom">Votre prénom *</label>
+            <input type="text" id="prenom" placeholder="Ex : Marie" required maxlength="40" />
+          </div>
+          <div class="form-group">
+            <label for="demande">Votre demande de prière *</label>
+            <textarea id="demande" rows="5" placeholder="Partagez votre besoin de prière…" required maxlength="500"></textarea>
+            <small id="char-count">0 / 500</small>
+          </div>
+          <div class="form-group checkbox-group">
+            <input type="checkbox" id="partager" />
+            <label for="partager">Partager publiquement cette intention</label>
+          </div>
+          <button type="submit" class="btn-primary btn-full">
+            <i class="fa-solid fa-paper-plane"></i> Envoyer la Demande
+          </button>
+        </form>
+        <div id="priere-success" class="success-msg" style="display:none">
+          <i class="fa-solid fa-circle-check"></i>
+          <p>Votre demande a été reçue. <strong>Nous prions pour vous ! 🙏</strong></p>
+        </div>
+      </div>
+
+      <!-- Intentions partagées -->
+      <div class="priere-public-card">
+        <h3><i class="fa-solid fa-heart"></i> Intentions Partagées</h3>
+        <p class="priere-public-sub">La communauté prie avec vous</p>
+        <div id="intentions-list" class="intentions-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 5 — FAIRE UN DON
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-don" class="section">
+  <div class="container">
+    <div class="don-header">
+      <i class="fa-solid fa-hand-holding-heart don-icon"></i>
+      <h2 class="section-title">FAIRE UN DON</h2>
+      <p class="section-subtitle">Votre offrande soutient la mission et les projets de l'Église FOI SAINTE.</p>
+    </div>
+
+    <div class="don-grid" id="don-grid"></div>
+
+    <div class="don-scripture">
+      <i class="fa-solid fa-quote-left"></i>
+      « Que chacun donne comme il l'a résolu en son cœur, sans tristesse ni contrainte ; car Dieu aime celui qui donne avec joie. »
+      <br><strong>— 2 Corinthiens 9:7</strong>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 6 — ADMINISTRATION
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-admin" class="section">
+  <div class="container">
+    <div class="admin-header">
+      <i class="fa-solid fa-lock admin-icon"></i>
+      <h2 class="section-title">TABLEAU DE BORD ADMINISTRATION</h2>
+      <p class="section-subtitle">Espace privé de gestion pour l'équipe pastorale et média.</p>
+    </div>
+
+    <div id="admin-login-card" class="admin-login-card">
+      <h3><i class="fa-solid fa-user-shield"></i> Accès privé</h3>
+      <p>Entrez le code d'accès administrateur.</p>
+      <div class="admin-login-row">
+        <input id="admin-pass" type="password" placeholder="Code d'accès" maxlength="40" />
+        <button class="btn-primary" onclick="adminLogin()">Se connecter</button>
+      </div>
+      <small>Au premier accès, entrez votre nouveau code pour l'initialiser.</small>
+    </div>
+
+    <div id="admin-dashboard" class="admin-dashboard" style="display:none">
+      <div class="admin-toolbar">
+        <span class="admin-badge"><i class="fa-solid fa-circle-check"></i> Session admin active</span>
+        <button class="btn-secondary" onclick="adminLogout()"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</button>
+      </div>
+
+      <div class="admin-grid">
+        <div class="admin-card">
+          <h3><i class="fa-solid fa-book-open"></i> Verset du jour</h3>
+          <label for="admin-verset-texte">Texte</label>
+          <textarea id="admin-verset-texte" rows="4" placeholder="Entrez le verset du jour..."></textarea>
+          <label for="admin-verset-ref">Référence</label>
+          <input id="admin-verset-ref" type="text" placeholder="Ex: Psaumes 46:2" />
+          <div class="admin-actions-row">
+            <button class="btn-primary" onclick="saveAdminVerse()">Enregistrer le verset</button>
+            <button class="btn-secondary" onclick="applyVerseToLive()">Afficher en direct</button>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <h3><i class="fa-solid fa-video"></i> Flux vidéo & diffusion</h3>
+          <label for="admin-stream-url">URL d'intégration (YouTube/Facebook)</label>
+          <input id="admin-stream-url" type="url" placeholder="https://www.youtube.com/embed/live_stream?channel=..." />
+          <label for="admin-live-video-id">ID vidéo live YouTube (pour le tchat YouTube)</label>
+          <input id="admin-live-video-id" type="text" placeholder="Ex: dQw4w9WgXcQ" />
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="admin-is-live" />
+            <label for="admin-is-live">Le culte est actuellement en direct</label>
+          </div>
+          <label for="admin-live-verse">Verset en direct (bandeau live)</label>
+          <textarea id="admin-live-verse" rows="3" placeholder="Texte affiché sous le lecteur"></textarea>
+          <button class="btn-primary btn-full" onclick="saveLiveSettings()">Mettre à jour le culte en direct</button>
+        </div>
+
+        <div class="admin-card">
+          <h3><i class="fa-solid fa-wallet"></i> Modes de paiement (dons)</h3>
+          <p class="admin-help">Activez les méthodes que vous voulez afficher sur la page publique.</p>
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-orange" />
+            <label for="don-show-orange">Afficher Orange Money</label>
+          </div>
+          <input id="don-orange-number" type="text" placeholder="Numéro Orange Money" />
+          <input id="don-orange-name" type="text" placeholder="Nom du bénéficiaire Orange" />
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-wave" />
+            <label for="don-show-wave">Afficher Wave</label>
+          </div>
+          <input id="don-wave-number" type="text" placeholder="Numéro Wave" />
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-mtn" />
+            <label for="don-show-mtn">Afficher MTN Money</label>
+          </div>
+          <input id="don-mtn-number" type="text" placeholder="Numéro MTN Money" />
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-paypal" />
+            <label for="don-show-paypal">Afficher PayPal / Carte</label>
+          </div>
+          <input id="don-paypal-url" type="url" placeholder="URL PayPal (https://www.paypal.com/donate?... )" />
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-cinetpay" />
+            <label for="don-show-cinetpay">Afficher CinetPay</label>
+          </div>
+          <input id="don-cinetpay-url" type="url" placeholder="URL de paiement CinetPay" />
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-flutterwave" />
+            <label for="don-show-flutterwave">Afficher Flutterwave</label>
+          </div>
+          <input id="don-flutterwave-url" type="url" placeholder="URL de paiement Flutterwave" />
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-skrill" />
+            <label for="don-show-skrill">Afficher Skrill</label>
+          </div>
+          <input id="don-skrill-url" type="url" placeholder="URL de paiement Skrill" />
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-bank" />
+            <label for="don-show-bank">Afficher virement bancaire</label>
+          </div>
+          <textarea id="don-bank-details" rows="3" placeholder="Ex: Banque, IBAN, BIC, titulaire"></textarea>
+
+          <div class="form-group checkbox-group admin-check-row">
+            <input type="checkbox" id="don-show-cash" />
+            <label for="don-show-cash">Afficher note offrandes en espèces</label>
+          </div>
+          <input id="don-cash-note" type="text" placeholder="Ex: Offrandes en espèces possibles après le culte" />
+
+          <input id="don-currency" type="text" placeholder="Devise (XOF, EUR, USD...)" maxlength="8" />
+          <button class="btn-primary btn-full" onclick="saveDonationsSettings()">Enregistrer les modes de paiement</button>
+        </div>
+
+        <div class="admin-card">
+          <h3><i class="fa-solid fa-film"></i> Gérer les vidéos replay</h3>
+          <div class="admin-replay-form">
+            <input id="admin-replay-id" type="text" placeholder="ID YouTube (ex: dQw4w9WgXcQ)" />
+            <input id="admin-replay-title" type="text" placeholder="Titre de la vidéo" />
+            <input id="admin-replay-date" type="text" placeholder="Date (ex: 25 avril 2026)" />
+            <button class="btn-primary btn-full" onclick="addReplayFromAdmin()">Ajouter le replay</button>
+          </div>
+          <div id="admin-replays-list" class="admin-list"></div>
+        </div>
+
+        <div class="admin-card">
+          <h3><i class="fa-solid fa-hands-praying"></i> Gérer les prières</h3>
+          <p class="admin-help">Affiche les intentions partagées publiquement.</p>
+          <div id="admin-prayers-list" class="admin-list"></div>
+        </div>
+
+        <div class="admin-card admin-card-wide">
+          <h3><i class="fa-solid fa-bell"></i> Notifications Web Push</h3>
+          <p class="admin-help">Envoyez une notification instantanée à tous les abonnés. Idéal pour annoncer le début du culte.</p>
+          <div class="stats-grid" style="margin-bottom:1rem">
+            <div class="stat-item">
+              <span class="stat-label">Abonnés actifs</span>
+              <strong id="push-stat-actif">—</strong>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem">
+            <input id="push-notif-title" type="text" placeholder="Titre (ex: Le culte commence !)" maxlength="100" />
+            <textarea id="push-notif-body" rows="2" placeholder="Message (ex: Rejoignez-nous maintenant sur le site)" maxlength="200"></textarea>
+            <button class="btn-primary" onclick="sendManualPush()"><i class="fa-solid fa-bell"></i> Envoyer la notification</button>
+          </div>
+          <hr style="border-color:rgba(255,255,255,.1);margin:1rem 0" />
+          <h4 style="margin-bottom:.8rem"><i class="fa-solid fa-clock"></i> Notification automatique avant le culte</h4>
+          <div style="display:flex;flex-direction:column;gap:.6rem">
+            <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+              <select id="push-sched-day" style="flex:1">
+                <option value="sunday">Dimanche</option>
+                <option value="monday">Lundi</option>
+                <option value="tuesday">Mardi</option>
+                <option value="wednesday">Mercredi</option>
+                <option value="thursday">Jeudi</option>
+                <option value="friday">Vendredi</option>
+                <option value="saturday">Samedi</option>
+              </select>
+              <input id="push-sched-hour" type="number" min="0" max="23" placeholder="Heure" style="width:80px" />
+              <input id="push-sched-minute" type="number" min="0" max="59" placeholder="Min" style="width:70px" />
+            </div>
+            <input id="push-sched-message" type="text" placeholder="Message automatique (ex: Le culte commence dans 30 min !)" maxlength="200" />
+            <div class="form-group checkbox-group admin-check-row">
+              <input type="checkbox" id="push-sched-enabled" />
+              <label for="push-sched-enabled">Activer l'envoi automatique</label>
+            </div>
+            <button class="btn-primary" onclick="savePushSchedule()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer le planning</button>
+          </div>
+        </div>
+
+        <div class="admin-card admin-card-wide">
+          <h3><i class="fa-solid fa-chart-line"></i> Statistiques de connexion</h3>
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">Visites totales</span>
+              <strong id="stat-visits">0</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Visiteurs uniques (jour)</span>
+              <strong id="stat-unique-day">0</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Messages tchat</span>
+              <strong id="stat-chat">0</strong>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">Demandes de prière</span>
+              <strong id="stat-prayers">0</strong>
+            </div>
+          </div>
+          <div class="admin-actions-row">
+            <button class="btn-secondary" onclick="resetStats()">Réinitialiser les stats</button>
+            <button class="btn-secondary" onclick="exportCSV('stats')">⬇ Exporter stats (CSV)</button>
+            <button class="btn-secondary" onclick="exportCSV('prayers')">⬇ Exporter prières (CSV)</button>
+            <button class="btn-secondary" onclick="exportCSV('replays')">⬇ Exporter replays (CSV)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <img src="logo-foi-sainte.jpg" alt="FOI SAINTE" class="logo-img footer-logo-img" />
+      <div>
+        <span class="logo-eglise">Église</span>
+        <span class="logo-nom">FOI SAINTE</span>
+      </div>
+    </div>
+    <div class="footer-links">
+      <a onclick="showSection('accueil',null)">Accueil</a>
+      <a onclick="showSection('live',null)">Culte en Direct</a>
+      <a onclick="showSection('replays',null)">Replays</a>
+      <a onclick="showSection('priere',null)">Prière</a>
+      <a onclick="showSection('don',null)">Don</a>
+      <a onclick="showSection('admin',null)">Administration</a>
+    </div>
+    <div class="footer-social">
+      <a href="https://youtube.com/@EgliseFoiSainte" target="_blank"><i class="fa-brands fa-youtube"></i></a>
+      <a href="https://facebook.com/EgliseFoiSainte" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+      <a href="https://twitter.com/EgliseFoiSainte" target="_blank"><i class="fa-brands fa-x-twitter"></i></a>
+      <a href="https://wa.me/groupEgliseFoiSainte" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+    </div>
+  </div>
+  <div class="footer-copy">
+    &copy; 2026 Église FOI SAINTE — Tous droits réservés &nbsp;|&nbsp;
+    <em>« …conservez-vous dans l'amour de Dieu… » — Jude 1:20-21</em>
+  </div>
+</footer>
+
+<!-- Toast notification -->
+<div id="toast" class="toast"></div>
+
+<!-- Bannière notification push -->
+<div id="push-banner" class="push-banner" style="display:none">
+  <i class="fa-solid fa-bell"></i>
+  <span>Recevez une notification avant chaque culte !</span>
+  <button class="btn-push-accept" onclick="requestPushPermission()">Activer</button>
+  <button class="btn-push-close" onclick="document.getElementById('push-banner').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

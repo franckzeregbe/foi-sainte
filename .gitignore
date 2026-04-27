@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+npm-debug.log
+package-lock.json
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+logs/
+*.log
+
+# Build output
+dist/
+build/
+
+# PM2
+ecosystem.config.cjs.bak
