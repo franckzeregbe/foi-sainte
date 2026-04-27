@@ -844,6 +844,8 @@ function openAdminDashboard() {
   const dashboard = document.getElementById('admin-dashboard');
   if (loginCard) loginCard.style.display = 'none';
   if (dashboard) dashboard.style.display = 'block';
+  // Ouvrir le premier panneau par défaut
+  showAdminPanel('verset');
 }
 
 function closeAdminDashboard() {
@@ -851,6 +853,36 @@ function closeAdminDashboard() {
   const dashboard = document.getElementById('admin-dashboard');
   if (loginCard) loginCard.style.display = 'block';
   if (dashboard) dashboard.style.display = 'none';
+}
+
+function showAdminPanel(panelId, btnEl) {
+  // Masquer tous les panneaux
+  document.querySelectorAll('.admin-panel').forEach((p) => p.classList.remove('active'));
+  // Désactiver tous les boutons du sidebar
+  document.querySelectorAll('.admin-sidenav-item').forEach((b) => b.classList.remove('active'));
+
+  // Afficher le panneau cible
+  const panel = document.getElementById('admin-panel-' + panelId);
+  if (panel) panel.classList.add('active');
+
+  // Activer le bouton correspondant
+  if (btnEl) {
+    btnEl.classList.add('active');
+  } else {
+    const sideBtn = document.querySelector(`.admin-sidenav-item[onclick*="'${panelId}'"]`);
+    if (sideBtn) sideBtn.classList.add('active');
+  }
+
+  // Fermer le sidebar sur mobile après sélection
+  const sidebar = document.getElementById('admin-sidebar');
+  if (sidebar && window.innerWidth < 900) {
+    sidebar.classList.remove('open');
+  }
+}
+
+function toggleAdminSidebar() {
+  const sidebar = document.getElementById('admin-sidebar');
+  if (sidebar) sidebar.classList.toggle('open');
 }
 
 async function loadAdminDashboard() {

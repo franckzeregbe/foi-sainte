@@ -1007,9 +1007,118 @@ nav {
   font-size: 0.9rem;
 }
 
-/* Administration */
+/* ── Lien admin discret dans le footer ── */
+.footer-admin-link {
+  opacity: 0.25;
+  color: inherit;
+  text-decoration: none;
+  margin-left: 0.6rem;
+  font-size: 0.8rem;
+  transition: opacity 0.2s;
+}
+.footer-admin-link:hover { opacity: 0.7; }
+
+/* ── Administration ── */
 .nav-link-admin {
   border: 1px solid rgba(212, 175, 55, 0.34);
+}
+
+/* Layout sidebar + contenu */
+.admin-layout {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+  min-height: 500px;
+}
+
+/* ── Sidebar ── */
+.admin-sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 1rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: sticky;
+  top: 80px;
+}
+
+.admin-sidenav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.admin-sidenav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: transparent;
+  border: none;
+  color: var(--text-soft);
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  text-align: left;
+  transition: background 0.18s, color 0.18s;
+  width: 100%;
+}
+
+.admin-sidenav-item:hover {
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold-300);
+}
+
+.admin-sidenav-item.active {
+  background: rgba(212, 175, 55, 0.18);
+  color: var(--gold-400);
+  font-weight: 600;
+}
+
+.admin-sidenav-item i {
+  width: 16px;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.admin-logout-btn {
+  width: 100%;
+  justify-content: center;
+  font-size: 0.85rem;
+}
+
+/* ── Contenu ── */
+.admin-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-panel {
+  display: none;
+}
+
+.admin-panel.active {
+  display: block;
+}
+
+/* Bouton menu mobile */
+.admin-menu-toggle {
+  display: none;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  color: var(--gold-300);
+  padding: 0.6rem 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-bottom: 0.9rem;
 }
 
 .admin-header {
@@ -1072,11 +1181,7 @@ nav {
 }
 
 .admin-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-  margin-bottom: 1.1rem;
+  display: none; /* Remplacé par la sidebar */
 }
 
 .admin-badge {
@@ -1088,13 +1193,14 @@ nav {
   color: #b9f0c9;
   padding: 0.4rem 0.8rem;
   border-radius: 999px;
-  font-size: 0.83rem;
+  font-size: 0.78rem;
+  text-align: center;
+  justify-content: center;
 }
 
+/* .admin-grid remplacé par .admin-layout (sidebar) */
 .admin-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(280px, 1fr));
-  gap: 1rem;
+  display: none;
 }
 
 .admin-card {
@@ -1102,7 +1208,7 @@ nav {
 }
 
 .admin-card-wide {
-  grid-column: 1 / -1;
+  /* inutilisé désormais */
 }
 
 .admin-card label {
@@ -1958,8 +2064,23 @@ footer {
     height: 420px;
   }
 
-  .admin-grid {
-    grid-template-columns: 1fr;
+  /* Admin sidebar → mode mobile : cachée par défaut, slide depuis gauche */
+  .admin-menu-toggle {
+    display: flex;
+  }
+
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    position: static;
+    display: none;
+  }
+
+  .admin-sidebar.open {
+    display: flex;
   }
 
   .admin-login-row {

@@ -31,7 +31,6 @@
       <a href="#replays" class="nav-link" onclick="showSection('replays',this)">Revoir le Culte</a>
       <a href="#priere" class="nav-link" onclick="showSection('priere',this)">Espace de Prière</a>
       <a href="#don" class="nav-link" onclick="showSection('don',this)">Faire un Don</a>
-      <a href="#admin" class="nav-link nav-link-admin" onclick="showSection('admin',this)">Administration</a>
     </nav>
     <button class="nav-toggle" onclick="toggleMenu()" aria-label="Menu">
       <i class="fa-solid fa-bars"></i>
@@ -317,187 +316,246 @@
     </div>
 
     <div id="admin-dashboard" class="admin-dashboard" style="display:none">
-      <div class="admin-toolbar">
-        <span class="admin-badge"><i class="fa-solid fa-circle-check"></i> Session admin active</span>
-        <button class="btn-secondary" onclick="adminLogout()"><i class="fa-solid fa-right-from-bracket"></i> Déconnexion</button>
-      </div>
 
-      <div class="admin-grid">
-        <div class="admin-card">
-          <h3><i class="fa-solid fa-book-open"></i> Verset du jour</h3>
-          <label for="admin-verset-texte">Texte</label>
-          <textarea id="admin-verset-texte" rows="4" placeholder="Entrez le verset du jour..."></textarea>
-          <label for="admin-verset-ref">Référence</label>
-          <input id="admin-verset-ref" type="text" placeholder="Ex: Psaumes 46:2" />
-          <div class="admin-actions-row">
-            <button class="btn-primary" onclick="saveAdminVerse()">Enregistrer le verset</button>
-            <button class="btn-secondary" onclick="applyVerseToLive()">Afficher en direct</button>
-          </div>
-        </div>
+      <!-- Bouton menu mobile -->
+      <button class="admin-menu-toggle" onclick="toggleAdminSidebar()" aria-label="Menu admin">
+        <i class="fa-solid fa-bars"></i> Menu
+      </button>
 
-        <div class="admin-card">
-          <h3><i class="fa-solid fa-video"></i> Flux vidéo & diffusion</h3>
-          <label for="admin-stream-url">URL d'intégration (YouTube/Facebook)</label>
-          <input id="admin-stream-url" type="url" placeholder="https://www.youtube.com/embed/live_stream?channel=..." />
-          <label for="admin-live-video-id">ID vidéo live YouTube (pour le tchat YouTube)</label>
-          <input id="admin-live-video-id" type="text" placeholder="Ex: dQw4w9WgXcQ" />
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="admin-is-live" />
-            <label for="admin-is-live">Le culte est actuellement en direct</label>
-          </div>
-          <label for="admin-live-verse">Verset en direct (bandeau live)</label>
-          <textarea id="admin-live-verse" rows="3" placeholder="Texte affiché sous le lecteur"></textarea>
-          <button class="btn-primary btn-full" onclick="saveLiveSettings()">Mettre à jour le culte en direct</button>
-        </div>
+      <div class="admin-layout">
 
-        <div class="admin-card">
-          <h3><i class="fa-solid fa-wallet"></i> Modes de paiement (dons)</h3>
-          <p class="admin-help">Activez les méthodes que vous voulez afficher sur la page publique.</p>
+        <!-- ── SIDEBAR ── -->
+        <aside class="admin-sidebar" id="admin-sidebar">
+          <div class="admin-badge"><i class="fa-solid fa-circle-check"></i> Session active</div>
+          <nav class="admin-sidenav">
+            <button class="admin-sidenav-item active" onclick="showAdminPanel('verset', this)">
+              <i class="fa-solid fa-book-open"></i> Verset du jour
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('live', this)">
+              <i class="fa-solid fa-video"></i> Flux vidéo
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('dons', this)">
+              <i class="fa-solid fa-wallet"></i> Dons
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('replays', this)">
+              <i class="fa-solid fa-film"></i> Replays
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('prieres', this)">
+              <i class="fa-solid fa-hands-praying"></i> Prières
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('push', this)">
+              <i class="fa-solid fa-bell"></i> Notifications
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('stats', this)">
+              <i class="fa-solid fa-chart-line"></i> Statistiques
+            </button>
+          </nav>
+          <button class="btn-secondary admin-logout-btn" onclick="adminLogout()">
+            <i class="fa-solid fa-right-from-bracket"></i> Déconnexion
+          </button>
+        </aside>
 
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-orange" />
-            <label for="don-show-orange">Afficher Orange Money</label>
-          </div>
-          <input id="don-orange-number" type="text" placeholder="Numéro Orange Money" />
-          <input id="don-orange-name" type="text" placeholder="Nom du bénéficiaire Orange" />
+        <!-- ── CONTENU ── -->
+        <div class="admin-content">
 
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-wave" />
-            <label for="don-show-wave">Afficher Wave</label>
-          </div>
-          <input id="don-wave-number" type="text" placeholder="Numéro Wave" />
-
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-mtn" />
-            <label for="don-show-mtn">Afficher MTN Money</label>
-          </div>
-          <input id="don-mtn-number" type="text" placeholder="Numéro MTN Money" />
-
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-paypal" />
-            <label for="don-show-paypal">Afficher PayPal / Carte</label>
-          </div>
-          <input id="don-paypal-url" type="url" placeholder="URL PayPal (https://www.paypal.com/donate?... )" />
-
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-cinetpay" />
-            <label for="don-show-cinetpay">Afficher CinetPay</label>
-          </div>
-          <input id="don-cinetpay-url" type="url" placeholder="URL de paiement CinetPay" />
-
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-flutterwave" />
-            <label for="don-show-flutterwave">Afficher Flutterwave</label>
-          </div>
-          <input id="don-flutterwave-url" type="url" placeholder="URL de paiement Flutterwave" />
-
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-skrill" />
-            <label for="don-show-skrill">Afficher Skrill</label>
-          </div>
-          <input id="don-skrill-url" type="url" placeholder="URL de paiement Skrill" />
-
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-bank" />
-            <label for="don-show-bank">Afficher virement bancaire</label>
-          </div>
-          <textarea id="don-bank-details" rows="3" placeholder="Ex: Banque, IBAN, BIC, titulaire"></textarea>
-
-          <div class="form-group checkbox-group admin-check-row">
-            <input type="checkbox" id="don-show-cash" />
-            <label for="don-show-cash">Afficher note offrandes en espèces</label>
-          </div>
-          <input id="don-cash-note" type="text" placeholder="Ex: Offrandes en espèces possibles après le culte" />
-
-          <input id="don-currency" type="text" placeholder="Devise (XOF, EUR, USD...)" maxlength="8" />
-          <button class="btn-primary btn-full" onclick="saveDonationsSettings()">Enregistrer les modes de paiement</button>
-        </div>
-
-        <div class="admin-card">
-          <h3><i class="fa-solid fa-film"></i> Gérer les vidéos replay</h3>
-          <div class="admin-replay-form">
-            <input id="admin-replay-id" type="text" placeholder="ID YouTube (ex: dQw4w9WgXcQ)" />
-            <input id="admin-replay-title" type="text" placeholder="Titre de la vidéo" />
-            <input id="admin-replay-date" type="text" placeholder="Date (ex: 25 avril 2026)" />
-            <button class="btn-primary btn-full" onclick="addReplayFromAdmin()">Ajouter le replay</button>
-          </div>
-          <div id="admin-replays-list" class="admin-list"></div>
-        </div>
-
-        <div class="admin-card">
-          <h3><i class="fa-solid fa-hands-praying"></i> Gérer les prières</h3>
-          <p class="admin-help">Affiche les intentions partagées publiquement.</p>
-          <div id="admin-prayers-list" class="admin-list"></div>
-        </div>
-
-        <div class="admin-card admin-card-wide">
-          <h3><i class="fa-solid fa-bell"></i> Notifications Web Push</h3>
-          <p class="admin-help">Envoyez une notification instantanée à tous les abonnés. Idéal pour annoncer le début du culte.</p>
-          <div class="stats-grid" style="margin-bottom:1rem">
-            <div class="stat-item">
-              <span class="stat-label">Abonnés actifs</span>
-              <strong id="push-stat-actif">—</strong>
+          <!-- Panneau : Verset du jour -->
+          <div class="admin-panel active" id="admin-panel-verset">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-book-open"></i> Verset du jour</h3>
+              <label for="admin-verset-texte">Texte</label>
+              <textarea id="admin-verset-texte" rows="4" placeholder="Entrez le verset du jour..."></textarea>
+              <label for="admin-verset-ref">Référence</label>
+              <input id="admin-verset-ref" type="text" placeholder="Ex: Psaumes 46:2" />
+              <div class="admin-actions-row">
+                <button class="btn-primary" onclick="saveAdminVerse()">Enregistrer le verset</button>
+                <button class="btn-secondary" onclick="applyVerseToLive()">Afficher en direct</button>
+              </div>
             </div>
           </div>
-          <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem">
-            <input id="push-notif-title" type="text" placeholder="Titre (ex: Le culte commence !)" maxlength="100" />
-            <textarea id="push-notif-body" rows="2" placeholder="Message (ex: Rejoignez-nous maintenant sur le site)" maxlength="200"></textarea>
-            <button class="btn-primary" onclick="sendManualPush()"><i class="fa-solid fa-bell"></i> Envoyer la notification</button>
-          </div>
-          <hr style="border-color:rgba(255,255,255,.1);margin:1rem 0" />
-          <h4 style="margin-bottom:.8rem"><i class="fa-solid fa-clock"></i> Notification automatique avant le culte</h4>
-          <div style="display:flex;flex-direction:column;gap:.6rem">
-            <div style="display:flex;gap:.6rem;flex-wrap:wrap">
-              <select id="push-sched-day" style="flex:1">
-                <option value="sunday">Dimanche</option>
-                <option value="monday">Lundi</option>
-                <option value="tuesday">Mardi</option>
-                <option value="wednesday">Mercredi</option>
-                <option value="thursday">Jeudi</option>
-                <option value="friday">Vendredi</option>
-                <option value="saturday">Samedi</option>
-              </select>
-              <input id="push-sched-hour" type="number" min="0" max="23" placeholder="Heure" style="width:80px" />
-              <input id="push-sched-minute" type="number" min="0" max="59" placeholder="Min" style="width:70px" />
-            </div>
-            <input id="push-sched-message" type="text" placeholder="Message automatique (ex: Le culte commence dans 30 min !)" maxlength="200" />
-            <div class="form-group checkbox-group admin-check-row">
-              <input type="checkbox" id="push-sched-enabled" />
-              <label for="push-sched-enabled">Activer l'envoi automatique</label>
-            </div>
-            <button class="btn-primary" onclick="savePushSchedule()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer le planning</button>
-          </div>
-        </div>
 
-        <div class="admin-card admin-card-wide">
-          <h3><i class="fa-solid fa-chart-line"></i> Statistiques de connexion</h3>
-          <div class="stats-grid">
-            <div class="stat-item">
-              <span class="stat-label">Visites totales</span>
-              <strong id="stat-visits">0</strong>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Visiteurs uniques (jour)</span>
-              <strong id="stat-unique-day">0</strong>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Messages tchat</span>
-              <strong id="stat-chat">0</strong>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">Demandes de prière</span>
-              <strong id="stat-prayers">0</strong>
+          <!-- Panneau : Flux vidéo -->
+          <div class="admin-panel" id="admin-panel-live">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-video"></i> Flux vidéo & diffusion</h3>
+              <label for="admin-stream-url">URL d'intégration (YouTube/Facebook)</label>
+              <input id="admin-stream-url" type="url" placeholder="https://www.youtube.com/embed/live_stream?channel=..." />
+              <label for="admin-live-video-id">ID vidéo live YouTube (pour le tchat YouTube)</label>
+              <input id="admin-live-video-id" type="text" placeholder="Ex: dQw4w9WgXcQ" />
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="admin-is-live" />
+                <label for="admin-is-live">Le culte est actuellement en direct</label>
+              </div>
+              <label for="admin-live-verse">Verset en direct (bandeau live)</label>
+              <textarea id="admin-live-verse" rows="3" placeholder="Texte affiché sous le lecteur"></textarea>
+              <button class="btn-primary btn-full" onclick="saveLiveSettings()">Mettre à jour le culte en direct</button>
             </div>
           </div>
-          <div class="admin-actions-row">
-            <button class="btn-secondary" onclick="resetStats()">Réinitialiser les stats</button>
-            <button class="btn-secondary" onclick="exportCSV('stats')">⬇ Exporter stats (CSV)</button>
-            <button class="btn-secondary" onclick="exportCSV('prayers')">⬇ Exporter prières (CSV)</button>
-            <button class="btn-secondary" onclick="exportCSV('replays')">⬇ Exporter replays (CSV)</button>
+
+          <!-- Panneau : Dons -->
+          <div class="admin-panel" id="admin-panel-dons">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-wallet"></i> Modes de paiement (dons)</h3>
+              <p class="admin-help">Activez les méthodes que vous voulez afficher sur la page publique.</p>
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-orange" />
+                <label for="don-show-orange">Afficher Orange Money</label>
+              </div>
+              <input id="don-orange-number" type="text" placeholder="Numéro Orange Money" />
+              <input id="don-orange-name" type="text" placeholder="Nom du bénéficiaire Orange" />
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-wave" />
+                <label for="don-show-wave">Afficher Wave</label>
+              </div>
+              <input id="don-wave-number" type="text" placeholder="Numéro Wave" />
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-mtn" />
+                <label for="don-show-mtn">Afficher MTN Money</label>
+              </div>
+              <input id="don-mtn-number" type="text" placeholder="Numéro MTN Money" />
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-paypal" />
+                <label for="don-show-paypal">Afficher PayPal / Carte</label>
+              </div>
+              <input id="don-paypal-url" type="url" placeholder="URL PayPal (https://www.paypal.com/donate?... )" />
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-cinetpay" />
+                <label for="don-show-cinetpay">Afficher CinetPay</label>
+              </div>
+              <input id="don-cinetpay-url" type="url" placeholder="URL de paiement CinetPay" />
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-flutterwave" />
+                <label for="don-show-flutterwave">Afficher Flutterwave</label>
+              </div>
+              <input id="don-flutterwave-url" type="url" placeholder="URL de paiement Flutterwave" />
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-skrill" />
+                <label for="don-show-skrill">Afficher Skrill</label>
+              </div>
+              <input id="don-skrill-url" type="url" placeholder="URL de paiement Skrill" />
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-bank" />
+                <label for="don-show-bank">Afficher virement bancaire</label>
+              </div>
+              <textarea id="don-bank-details" rows="3" placeholder="Ex: Banque, IBAN, BIC, titulaire"></textarea>
+
+              <div class="form-group checkbox-group admin-check-row">
+                <input type="checkbox" id="don-show-cash" />
+                <label for="don-show-cash">Afficher note offrandes en espèces</label>
+              </div>
+              <input id="don-cash-note" type="text" placeholder="Ex: Offrandes en espèces possibles après le culte" />
+
+              <input id="don-currency" type="text" placeholder="Devise (XOF, EUR, USD...)" maxlength="8" />
+              <button class="btn-primary btn-full" onclick="saveDonationsSettings()">Enregistrer les modes de paiement</button>
+            </div>
           </div>
-        </div>
-      </div>
-    </div>
+
+          <!-- Panneau : Replays -->
+          <div class="admin-panel" id="admin-panel-replays">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-film"></i> Gérer les vidéos replay</h3>
+              <div class="admin-replay-form">
+                <input id="admin-replay-id" type="text" placeholder="ID YouTube (ex: dQw4w9WgXcQ)" />
+                <input id="admin-replay-title" type="text" placeholder="Titre de la vidéo" />
+                <input id="admin-replay-date" type="text" placeholder="Date (ex: 25 avril 2026)" />
+                <button class="btn-primary btn-full" onclick="addReplayFromAdmin()">Ajouter le replay</button>
+              </div>
+              <div id="admin-replays-list" class="admin-list"></div>
+            </div>
+          </div>
+
+          <!-- Panneau : Prières -->
+          <div class="admin-panel" id="admin-panel-prieres">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-hands-praying"></i> Gérer les prières</h3>
+              <p class="admin-help">Affiche les intentions partagées publiquement.</p>
+              <div id="admin-prayers-list" class="admin-list"></div>
+            </div>
+          </div>
+
+          <!-- Panneau : Notifications Push -->
+          <div class="admin-panel" id="admin-panel-push">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-bell"></i> Notifications Web Push</h3>
+              <p class="admin-help">Envoyez une notification instantanée à tous les abonnés. Idéal pour annoncer le début du culte.</p>
+              <div class="stats-grid" style="margin-bottom:1rem">
+                <div class="stat-item">
+                  <span class="stat-label">Abonnés actifs</span>
+                  <strong id="push-stat-actif">—</strong>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1rem">
+                <input id="push-notif-title" type="text" placeholder="Titre (ex: Le culte commence !)" maxlength="100" />
+                <textarea id="push-notif-body" rows="2" placeholder="Message (ex: Rejoignez-nous maintenant sur le site)" maxlength="200"></textarea>
+                <button class="btn-primary" onclick="sendManualPush()"><i class="fa-solid fa-bell"></i> Envoyer la notification</button>
+              </div>
+              <hr style="border-color:rgba(255,255,255,.1);margin:1rem 0" />
+              <h4 style="margin-bottom:.8rem"><i class="fa-solid fa-clock"></i> Notification automatique avant le culte</h4>
+              <div style="display:flex;flex-direction:column;gap:.6rem">
+                <div style="display:flex;gap:.6rem;flex-wrap:wrap">
+                  <select id="push-sched-day" style="flex:1;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:.75rem .9rem;color:#fff">
+                    <option value="sunday">Dimanche</option>
+                    <option value="monday">Lundi</option>
+                    <option value="tuesday">Mardi</option>
+                    <option value="wednesday">Mercredi</option>
+                    <option value="thursday">Jeudi</option>
+                    <option value="friday">Vendredi</option>
+                    <option value="saturday">Samedi</option>
+                  </select>
+                  <input id="push-sched-hour" type="number" min="0" max="23" placeholder="Heure" style="width:80px" />
+                  <input id="push-sched-minute" type="number" min="0" max="59" placeholder="Min" style="width:70px" />
+                </div>
+                <input id="push-sched-message" type="text" placeholder="Message automatique (ex: Le culte commence dans 30 min !)" maxlength="200" />
+                <div class="form-group checkbox-group admin-check-row">
+                  <input type="checkbox" id="push-sched-enabled" />
+                  <label for="push-sched-enabled">Activer l'envoi automatique</label>
+                </div>
+                <button class="btn-primary" onclick="savePushSchedule()"><i class="fa-solid fa-floppy-disk"></i> Enregistrer le planning</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panneau : Statistiques -->
+          <div class="admin-panel" id="admin-panel-stats">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-chart-line"></i> Statistiques de connexion</h3>
+              <div class="stats-grid">
+                <div class="stat-item">
+                  <span class="stat-label">Visites totales</span>
+                  <strong id="stat-visits">0</strong>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Visiteurs uniques (jour)</span>
+                  <strong id="stat-unique-day">0</strong>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Messages tchat</span>
+                  <strong id="stat-chat">0</strong>
+                </div>
+                <div class="stat-item">
+                  <span class="stat-label">Demandes de prière</span>
+                  <strong id="stat-prayers">0</strong>
+                </div>
+              </div>
+              <div class="admin-actions-row">
+                <button class="btn-secondary" onclick="resetStats()">Réinitialiser les stats</button>
+                <button class="btn-secondary" onclick="exportCSV('stats')">⬇ Exporter stats (CSV)</button>
+                <button class="btn-secondary" onclick="exportCSV('prayers')">⬇ Exporter prières (CSV)</button>
+                <button class="btn-secondary" onclick="exportCSV('replays')">⬇ Exporter replays (CSV)</button>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /admin-content -->
+      </div><!-- /admin-layout -->
+    </div><!-- /admin-dashboard -->
   </div>
 </section>
 
@@ -517,7 +575,6 @@
       <a onclick="showSection('replays',null)">Replays</a>
       <a onclick="showSection('priere',null)">Prière</a>
       <a onclick="showSection('don',null)">Don</a>
-      <a onclick="showSection('admin',null)">Administration</a>
     </div>
     <div class="footer-social">
       <a href="https://youtube.com/@EgliseFoiSainte" target="_blank"><i class="fa-brands fa-youtube"></i></a>
@@ -529,6 +586,7 @@
   <div class="footer-copy">
     &copy; 2026 Église FOI SAINTE — Tous droits réservés &nbsp;|&nbsp;
     <em>« …conservez-vous dans l'amour de Dieu… » — Jude 1:20-21</em>
+    <a href="#admin" onclick="showSection('admin',null)" class="footer-admin-link" title="Accès privé"><i class="fa-solid fa-lock"></i></a>
   </div>
 </footer>
 
