@@ -1653,11 +1653,14 @@ function renderEglise(e) {
   if (grid && e.equipe) {
     const membres = e.equipe.split('\n').map(l => l.trim()).filter(Boolean);
     grid.innerHTML = membres.map(m => {
-      const [nom, role] = m.split('|').map(s => s.trim());
+      const [nom, role, photo] = m.split('|').map(s => s.trim());
       const initials = (nom || '?').substring(0, 2).toUpperCase();
+      const avatarContent = photo
+        ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(nom || '')}" onerror="this.parentElement.innerHTML='${initials}'" />`
+        : escapeHtml(initials);
       return `
         <div class="equipe-card">
-          <div class="equipe-avatar">${escapeHtml(initials)}</div>
+          <div class="equipe-avatar">${avatarContent}</div>
           <div class="equipe-nom">${escapeHtml(nom || '')}</div>
           <div class="equipe-role">${escapeHtml(role || '')}</div>
         </div>`;
