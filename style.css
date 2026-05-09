@@ -2952,3 +2952,99 @@ footer {
   font-size: .95rem;
   margin: .25rem 0 .4rem;
 }
+
+/* ─── FICHES MEMBRES ÉQUIPE ──────────────────────────────────────────────── */
+.membre-row {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  padding: .75rem;
+  animation: fadeIn .2s ease;
+}
+
+.membre-row-avatar {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.membre-row-preview {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--logo-red), var(--logo-orange));
+  border: 2px solid rgba(200,169,81,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #fff;
+  font-size: 1.3rem;
+}
+
+.membre-row-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.membre-row-upload-btn {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--gold-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: .65rem;
+  color: #0a0a1a;
+  transition: transform .15s;
+}
+
+.membre-row-upload-btn:hover { transform: scale(1.15); }
+
+.membre-row-fields {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  min-width: 0;
+}
+
+.membre-row-fields input {
+  width: 100%;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 8px;
+  padding: .5rem .75rem;
+  color: var(--white);
+  font-size: .88rem;
+  font-family: var(--font-main);
+  outline: none;
+  transition: border-color .2s;
+}
+
+.membre-row-fields input:focus {
+  border-color: rgba(200,169,81,.6);
+}
+
+.membre-row-delete {
+  flex-shrink: 0;
+  background: rgba(220,50,50,.15);
+  border: 1px solid rgba(220,50,50,.3);
+  color: #f87171;
+  border-radius: 8px;
+  padding: .5rem .65rem;
+  cursor: pointer;
+  font-size: .85rem;
+  transition: filter .15s;
+}
+
+.membre-row-delete:hover { filter: brightness(1.3); }
