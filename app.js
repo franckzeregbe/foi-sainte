@@ -1668,29 +1668,132 @@ function renderEglise(e) {
   }
 }
 
+// ── Autosave debounce ──────────────────────────────────────────────────────────
+let _egliseAutosaveTimer = null;
+function scheduleEgliseAutosave() {
+  clearTimeout(_egliseAutosaveTimer);
+  const ind = document.getElementById('eglise-autosave-indicator');
+  if (ind) { ind.textContent = '…'; ind.style.color = 'rgba(255,255,255,.35)'; }
+  _egliseAutosaveTimer = setTimeout(() => saveEgliseSettings(true), 1500);
+}
+
+// ── Membres équipe ─────────────────────────────────────────────────────────────
+function addMembreRow(nom = '', role = '', photo = '') {
+  const list = document.getElementById('equipe-membres-list');
+  if (!list) return;
+  const idx = Date.now();
+  const row = document.createElement('div');
+  row.className = 'membre-row';
+  row.dataset.idx = idx;
+  row.innerHTML = `
+    <div class="membre-row-avatar">
+      <div class="membre-row-preview" id="prev-${idx}">
+        ${photo ? `<img src="${escapeHtml(photo)}" />` : '<i class="fa-solid fa-user"></i>'}
+      </div>
+      <label class="membre-row-upload-btn" title="Choisir une photo">
+        <i class="fa-solid fa-camera"></i>
+        <input type="file" accept="image/*" style="display:none" onchange="uploadMembrePhoto(this, ${idx})" />
+      </label>
+    </div>
+    <div class="membre-row-fields">
+      <input type="text" class="membre-nom" placeholder="Nom complet" value="${escapeHtml(nom)}" oninput="scheduleEgliseAutosave()" />
+      <input type="text" class="membre-role" placeholder="Rôle / Titre" value="${escapeHtml(role)}" oninput="scheduleEgliseAutosave()" />
+      <input type="hidden" class="membre-photo" value="${escapeHtml(photo)}" />
+    </div>
+    <button type="button" class="membre-row-delete" onclick="removeMembreRow(this)" title="Supprimer">
+      <i class="fa-solid fa-trash"></i>
+    </button>`;
+  list.appendChild(row);
+}
+
+function removeMembreRow(btn) {
+  btn.closest('.membre-row').remove();
+  scheduleEgliseAutosave();
+}
+
+async function uploadMembrePhoto(input, idx) {
+  if (!input.files || !input.files[0]) return;
+  const formData = new FormData();
+  formData.append('photo', input.files[0]);
+  try {
+    const res = await fetch('/api/admin/upload-photo', {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok || !data.url) { showToast('Erreur upload : ' + (data.error || 'inconnu')); return; }
+    const row = document.querySelector(`.membre-row[data-idx="${idx}"]`);
+    if (!row) return;
+    row.querySelector('.membre-photo').value = data.url;
+    const prev = document.getElementById(`prev-${idx}`);
+    if (prev) prev.innerHTML = `<img src="${data.url}" />`;
+    scheduleEgliseAutosave();
+    showToast('Photo uploadée ✓');
+  } catch {
+    showToast('Impossible d\'uploader la photo.');
+  }
+}
+
+function getMembreRows() {
+  return [...document.querySelectorAll('#equipe-membres-list .membre-row')].map(row => ({
+    nom: row.querySelector('.membre-nom')?.value.trim() || '',
+    role: row.querySelector('.membre-role')?.value.trim() || '',
+    photo: row.querySelector('.membre-photo')?.value.trim() || '',
+  })).filter(m => m.nom);
+}
+
 function fillEgliseForms() {
   const e = APP_STATE.eglise || {};
-  const fields = ['nom','slogan','vision','mission','valeurs','histoire','horaireCulte','horaireEtude','horaireVeillee','adresse','contact','email','equipe'];
-  fields.forEach(f => {
+  const textFields = ['nom','slogan','vision','mission','valeurs','histoire','horaireCulte','horaireEtude','horaireVeillee','adresse','contact','email'];
+  textFields.forEach(f => {
     const el = document.getElementById('eglise-' + f.replace(/([A-Z])/g, '-$1').toLowerCase());
     if (el) el.value = e[f] || '';
   });
+  // Remplir les fiches membres
+  const list = document.getElementById('equipe-membres-list');
+  if (list) {
+    list.innerHTML = '';
+    const membres = (e.equipe || '').split('\n').map(l => l.trim()).filter(Boolean);
+    membres.forEach(m => {
+      const [nom, role, photo] = m.split('|').map(s => s.trim());
+      addMembreRow(nom || '', role || '', photo || '');
+    });
+  }
+  // Attacher autosave sur les champs texte
+  textFields.forEach(f => {
+    const el = document.getElementById('eglise-' + f.replace(/([A-Z])/g, '-$1').toLowerCase());
+    if (el && !el.dataset.autosave) {
+      el.dataset.autosave = '1';
+      el.addEventListener('input', scheduleEgliseAutosave);
+    }
+  });
 }
 
-async function saveEgliseSettings() {
-  const fields = ['nom','slogan','vision','mission','valeurs','histoire','horaireCulte','horaireEtude','horaireVeillee','adresse','contact','email','equipe'];
+async function saveEgliseSettings(silent = false) {
+  const textFields = ['nom','slogan','vision','mission','valeurs','histoire','horaireCulte','horaireEtude','horaireVeillee','adresse','contact','email'];
   const payload = {};
-  fields.forEach(f => {
+  textFields.forEach(f => {
     const el = document.getElementById('eglise-' + f.replace(/([A-Z])/g, '-$1').toLowerCase());
     payload[f] = el ? el.value.trim() : '';
   });
+  // Construire equipe depuis les fiches membres
+  payload.equipe = getMembreRows().map(m => [m.nom, m.role, m.photo].filter(Boolean).join(' | ')).join('\n');
   try {
     const data = await api('/api/admin/eglise', { method: 'PUT', body: JSON.stringify(payload) });
     APP_STATE.eglise = data.eglise || payload;
     renderEglise(APP_STATE.eglise);
-    showToast('Présentation de l\'église enregistrée.');
+    const ind = document.getElementById('eglise-autosave-indicator');
+    if (silent) {
+      if (ind) { ind.textContent = '✓ Sauvegardé'; ind.style.color = '#4ade80'; setTimeout(() => { if (ind) ind.textContent = ''; }, 2000); }
+    } else {
+      showToast('Présentation enregistrée ✓');
+      if (ind) { ind.textContent = '✓ Sauvegardé'; ind.style.color = '#4ade80'; setTimeout(() => { if (ind) ind.textContent = ''; }, 2000); }
+    }
   } catch {
-    showToast('Impossible de sauvegarder.');
+    const ind = document.getElementById('eglise-autosave-indicator');
+    if (ind) { ind.textContent = '⚠ Erreur'; ind.style.color = '#f87171'; }
+    if (!silent) showToast('Impossible de sauvegarder.');
   }
 }
 
