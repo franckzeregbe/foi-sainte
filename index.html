@@ -59,7 +59,19 @@
           </a>
         </div>
       </div>
-      <a href="#priere" class="nav-link" onclick="showSection('priere',this)">Espace de Prière</a>
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn" onclick="toggleNavDropdown(event,'nav-dd-priere')">
+          Espace de Prière <i class="fa-solid fa-chevron-down nav-chevron"></i>
+        </button>
+        <div class="nav-dropdown-menu" id="nav-dd-priere">
+          <a href="#priere" class="nav-dropdown-item" onclick="showSection('priere',null);closeNavDropdown()">
+            <i class="fa-solid fa-hands-praying"></i> Sujets de Prière
+          </a>
+          <a href="#temoignage" class="nav-dropdown-item" onclick="showSection('temoignage',null);closeNavDropdown()">
+            <i class="fa-solid fa-star"></i> Témoignages
+          </a>
+        </div>
+      </div>
       <a href="#don" class="nav-link" onclick="showSection('don',this)">Faire un Don</a>
     </nav>
     <button class="nav-toggle" onclick="toggleMenu()" aria-label="Menu">
@@ -123,7 +135,7 @@
   <div class="quick-bar">
     <!-- Filigrane flamme dans hero -->
     <div class="flame-watermark hero-flame" aria-hidden="true"></div>
-    <button class="quick-item" onclick="showSection('priere', document.querySelector('[href=\'#priere\']'))">
+    <button class="quick-item" onclick="showSection('priere',null)">
       <div class="quick-icon-wrap">
         <i class="fa-solid fa-person-praying"></i>
       </div>
@@ -333,6 +345,7 @@
         <p id="eglise-contact-display2">+225 07 89 36 21 85</p>
         <div class="hero-ctas">
           <button class="btn-primary" onclick="showSection('priere',null)"><i class="fa-solid fa-hands-praying"></i> Envoyer une demande de prière</button>
+          <button class="btn-secondary" onclick="showSection('temoignage',null)"><i class="fa-solid fa-star"></i> Partager un témoignage</button>
         </div>
       </div>
     </div>
@@ -426,15 +439,17 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════
-     SECTION 4 — ESPACE DE PRIÈRE
+     SECTION 4 — SUJETS DE PRIÈRE
 ═══════════════════════════════════════════════════════════════ -->
 <section id="section-priere" class="section">
-  <div class="container">
-    <div class="priere-header">
-      <i class="fa-solid fa-hands-praying priere-icon"></i>
-      <h2 class="section-title">ESPACE DE PRIÈRE</h2>
-      <p class="section-subtitle">Déposez votre intention de prière — <em>Nous prions pour vous !</em></p>
+  <div class="sous-section-hero" style="--accent:#9b59b6">
+    <div class="sous-section-hero-inner">
+      <i class="fa-solid fa-hands-praying sous-section-icon"></i>
+      <h1>Sujets de Prière</h1>
+      <p>Déposez votre intention — <em>Nous prions pour vous !</em></p>
     </div>
+  </div>
+  <div class="container">
 
     <div class="priere-grid">
       <!-- Formulaire -->
@@ -469,6 +484,56 @@
         <h3><i class="fa-solid fa-heart"></i> Intentions Partagées</h3>
         <p class="priere-public-sub">La communauté prie avec vous</p>
         <div id="intentions-list" class="intentions-list"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION — TÉMOIGNAGES
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-temoignage" class="section">
+  <div class="sous-section-hero" style="--accent:#f39c12">
+    <div class="sous-section-hero-inner">
+      <i class="fa-solid fa-star sous-section-icon"></i>
+      <h1>Témoignages</h1>
+      <p>Partagez ce que Dieu a fait dans votre vie</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="priere-grid">
+      <!-- Formulaire témoignage -->
+      <div class="priere-form-card">
+        <h3><i class="fa-solid fa-pen-to-square"></i> Partagez votre témoignage</h3>
+        <form id="temoignage-form" onsubmit="submitTemoignage(event)">
+          <div class="form-group">
+            <label for="temo-prenom">Votre prénom *</label>
+            <input type="text" id="temo-prenom" placeholder="Ex : Jean" required maxlength="40" />
+          </div>
+          <div class="form-group">
+            <label for="temo-titre">Titre du témoignage *</label>
+            <input type="text" id="temo-titre" placeholder="Ex : Guérison miraculeuse" required maxlength="100" />
+          </div>
+          <div class="form-group">
+            <label for="temo-texte">Votre témoignage *</label>
+            <textarea id="temo-texte" rows="6" placeholder="Racontez ce que Dieu a fait dans votre vie…" required maxlength="1000"></textarea>
+            <small id="temo-char-count">0 / 1000</small>
+          </div>
+          <button type="submit" class="btn-primary btn-full">
+            <i class="fa-solid fa-paper-plane"></i> Partager mon témoignage
+          </button>
+        </form>
+        <div id="temoignage-success" class="success-msg" style="display:none">
+          <i class="fa-solid fa-circle-check"></i>
+          <p>Merci pour votre témoignage ! <strong>Gloire à Dieu ! 🙌</strong></p>
+        </div>
+      </div>
+
+      <!-- Témoignages partagés -->
+      <div class="priere-public-card">
+        <h3><i class="fa-solid fa-star"></i> Témoignages de la communauté</h3>
+        <p class="priere-public-sub">Ce que Dieu accomplit parmi nous</p>
+        <div id="temoignages-list" class="intentions-list"></div>
       </div>
     </div>
   </div>
@@ -906,6 +971,7 @@
       <a onclick="showSection('live',null)">Culte en Direct</a>
       <a onclick="showSection('replays',null)">Replays</a>
       <a onclick="showSection('priere',null)">Prière</a>
+      <a onclick="showSection('temoignage',null)">Témoignages</a>
       <a onclick="showSection('don',null)">Don</a>
     </div>
     <div class="footer-social">
