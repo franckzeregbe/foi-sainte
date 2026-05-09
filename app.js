@@ -300,7 +300,7 @@ function applyPublicContentToUI() {
   const frame = document.getElementById('yt-live-frame');
 
   if (label) {
-    label.innerHTML = `<i class="fa-solid ${cfg.icon}"></i> <span style="color:${cfg.color};letter-spacing:2px">${cfg.label} DU JOUR</span>`;
+    label.innerHTML = `<i class="fa-solid ${cfg.icon}" style="color:${cfg.color}"></i> MESSAGE DU JOUR`;
   }
   if (verseText) verseText.textContent = verse.texte;
   if (verseRef) verseRef.textContent = `- ${verse.ref} -`;
