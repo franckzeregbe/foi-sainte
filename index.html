@@ -511,8 +511,8 @@
               <h3><i class="fa-solid fa-video"></i> Flux vidéo & diffusion</h3>
               <label for="admin-stream-url">URL d'intégration (YouTube/Facebook)</label>
               <input id="admin-stream-url" type="url" placeholder="https://www.youtube.com/embed/live_stream?channel=..." />
-              <label for="admin-live-video-id">ID vidéo live YouTube (pour le tchat YouTube)</label>
-              <input id="admin-live-video-id" type="text" placeholder="Ex: dQw4w9WgXcQ" />
+              <label for="admin-live-video-id">URL ou ID vidéo live YouTube</label>
+              <input id="admin-live-video-id" type="text" placeholder="Collez l'URL YouTube ou l'ID directement" oninput="extractYoutubeId(this)" />
               <div class="form-group checkbox-group admin-check-row">
                 <input type="checkbox" id="admin-is-live" />
                 <label for="admin-is-live">Le culte est actuellement en direct</label>

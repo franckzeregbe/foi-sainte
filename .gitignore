@@ -33,3 +33,7 @@ build/
 
 # PM2
 ecosystem.config.cjs.bak
+
+# Scripts locaux
+push.bat
+autopush.js
