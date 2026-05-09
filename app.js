@@ -1186,6 +1186,7 @@ async function loadAdminDashboard() {
     APP_STATE.donations = data.donations || APP_STATE.donations;
     APP_STATE.replays = Array.isArray(data.replays) ? data.replays : APP_STATE.replays;
     APP_STATE.adminPrayers = Array.isArray(data.prayers) ? data.prayers : [];
+    APP_STATE.temoignages = Array.isArray(data.temoignages) ? data.temoignages : [];
     APP_STATE.agenda = Array.isArray(data.agenda) ? data.agenda : APP_STATE.agenda;
     APP_STATE.eglise = data.eglise || APP_STATE.eglise;
     APP_STATE.stats = data.stats || APP_STATE.stats;
@@ -1193,6 +1194,7 @@ async function loadAdminDashboard() {
     fillAdminForms();
     renderAdminReplays();
     renderAdminPrayers();
+    renderAdminTemoignages();
     renderAdminAgenda();
     fillEgliseForms();
     updateStatsUi();
@@ -1682,6 +1684,35 @@ async function saveEgliseSettings() {
     showToast('Présentation de l\'église enregistrée.');
   } catch {
     showToast('Impossible de sauvegarder.');
+  }
+}
+
+function renderAdminTemoignages() {
+  const list = document.getElementById('admin-temoignages-list');
+  if (!list) return;
+  if (!APP_STATE.temoignages.length) {
+    list.innerHTML = '<p class="admin-empty">Aucun témoignage.</p>';
+    return;
+  }
+  list.innerHTML = APP_STATE.temoignages.map((t) => `
+    <div class="admin-list-item">
+      <div>
+        <strong>${escapeHtml(t.name)} — ${escapeHtml(t.titre)}</strong>
+        <small>${escapeHtml(t.texte)}</small>
+      </div>
+      <button class="btn-secondary" onclick="removeTemoignage(${Number(t.id)})">Retirer</button>
+    </div>
+  `).join('');
+}
+
+async function removeTemoignage(id) {
+  try {
+    await api(`/api/admin/temoignages/${id}`, { method: 'DELETE' });
+    await loadPublicContent();
+    await loadAdminDashboard();
+    showToast('Témoignage retiré.');
+  } catch {
+    showToast('Suppression impossible.');
   }
 }
 
