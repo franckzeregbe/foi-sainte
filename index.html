@@ -494,25 +494,15 @@
           <div class="admin-panel active" id="admin-panel-verset">
             <div class="admin-card">
               <h3><i class="fa-solid fa-sun"></i> Message du jour</h3>
-              <p class="admin-help">Un message est généré automatiquement chaque jour. Vous pouvez le remplacer par le vôtre.</p>
+              <p class="admin-help">Un message est généré automatiquement chaque jour. Vous pouvez écrire le vôtre ou en générer un aléatoire.</p>
               <div class="admin-actions-row" style="margin-bottom:.9rem">
                 <button class="btn-secondary" onclick="generateRandomMessage()">
-                  <i class="fa-solid fa-shuffle"></i> Générer un message aléatoire
+                  <i class="fa-solid fa-shuffle"></i> Générer aléatoire
                 </button>
                 <button class="btn-secondary" onclick="restoreDailyMessage()">
-                  <i class="fa-solid fa-rotate-left"></i> Restaurer le message du jour
+                  <i class="fa-solid fa-rotate-left"></i> Message du jour auto
                 </button>
               </div>
-              <label>Type de message</label>
-              <select id="admin-message-type" style="width:100%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.13);border-radius:10px;padding:.75rem .9rem;color:#fff;margin-bottom:.75rem;font-family:inherit">
-                <option value="inspiration">✨ Inspiration</option>
-                <option value="priere">🙏 Prière</option>
-                <option value="exhortation">🔥 Exhortation</option>
-                <option value="repentance">💔 Repentance</option>
-                <option value="louange">🎶 Louange</option>
-                <option value="promesse">📜 Promesse</option>
-                <option value="foi">⚔️ Foi</option>
-              </select>
               <label for="admin-verset-texte">Message</label>
               <textarea id="admin-verset-texte" rows="4" placeholder="Entrez le message du jour..."></textarea>
               <label for="admin-verset-ref">Référence biblique</label>
