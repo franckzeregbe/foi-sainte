@@ -2705,3 +2705,115 @@ footer {
     justify-content: flex-end;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   NAV DROPDOWN — CULTES
+═══════════════════════════════════════════════════ */
+
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-btn {
+  background: none;
+  border: none;
+  color: rgba(255,255,255,.83);
+  font-size: .9rem;
+  padding: .45rem .9rem;
+  border-radius: 999px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  transition: all .2s ease;
+  font-family: var(--font-main);
+}
+
+.nav-dropdown-btn:hover,
+.nav-dropdown-btn.active {
+  color: var(--gold-300);
+  background: rgba(212,175,55,.14);
+  border: 1px solid rgba(212,175,55,.28);
+}
+
+.nav-chevron {
+  font-size: .65rem;
+  transition: transform .2s ease;
+}
+
+.nav-dropdown-btn.active .nav-chevron {
+  transform: rotate(180deg);
+}
+
+.nav-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + .5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(6,20,40,.97);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(212,175,55,.22);
+  border-radius: 14px;
+  padding: .4rem;
+  min-width: 200px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.45);
+  z-index: 1100;
+  animation: dropdownIn .18s ease;
+}
+
+.nav-dropdown-menu.open {
+  display: block;
+}
+
+@keyframes dropdownIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: .65rem;
+  padding: .7rem 1rem;
+  border-radius: 10px;
+  color: rgba(255,255,255,.85);
+  font-size: .9rem;
+  font-weight: 500;
+  transition: background .15s, color .15s;
+  cursor: pointer;
+}
+
+.nav-dropdown-item:hover {
+  background: rgba(212,175,55,.12);
+  color: var(--gold-300);
+}
+
+.nav-dropdown-item i {
+  width: 16px;
+  text-align: center;
+  font-size: .85rem;
+  color: var(--logo-orange);
+}
+
+/* Mobile — dropdown intégré dans le menu burger */
+@media (max-width: 900px) {
+  .nav-dropdown-menu {
+    position: static;
+    transform: none;
+    background: rgba(255,255,255,.05);
+    border: none;
+    border-radius: 10px;
+    box-shadow: none;
+    padding: .2rem .2rem .2rem 1rem;
+    margin-top: .2rem;
+    animation: none;
+  }
+
+  .nav-dropdown-btn {
+    width: 100%;
+    justify-content: space-between;
+    border-radius: 10px;
+  }
+}
