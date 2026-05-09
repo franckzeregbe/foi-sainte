@@ -27,12 +27,30 @@
     </div>
     <nav id="nav">
       <a href="#accueil" class="nav-link active" onclick="showSection('accueil',this)">Accueil</a>
-      <a href="#eglise" class="nav-link" onclick="showSection('eglise',this)">Notre Église</a>
       <div class="nav-dropdown">
-        <button class="nav-link nav-dropdown-btn" onclick="toggleNavDropdown(event)">
+        <button class="nav-link nav-dropdown-btn" onclick="toggleNavDropdown(event,'nav-dd-eglise')">
+          Notre Église <i class="fa-solid fa-chevron-down nav-chevron"></i>
+        </button>
+        <div class="nav-dropdown-menu" id="nav-dd-eglise">
+          <a href="#presentation" class="nav-dropdown-item" onclick="showSection('presentation',null);closeNavDropdown()">
+            <i class="fa-solid fa-church"></i> Présentation
+          </a>
+          <a href="#vision" class="nav-dropdown-item" onclick="showSection('vision',null);closeNavDropdown()">
+            <i class="fa-solid fa-eye"></i> Vision &amp; Mission
+          </a>
+          <a href="#histoire" class="nav-dropdown-item" onclick="showSection('histoire',null);closeNavDropdown()">
+            <i class="fa-solid fa-book-open"></i> Notre Histoire
+          </a>
+          <a href="#equipe" class="nav-dropdown-item" onclick="showSection('equipe',null);closeNavDropdown()">
+            <i class="fa-solid fa-users"></i> Équipe Pastorale
+          </a>
+        </div>
+      </div>
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn" onclick="toggleNavDropdown(event,'nav-dd-cultes')">
           Cultes <i class="fa-solid fa-chevron-down nav-chevron"></i>
         </button>
-        <div class="nav-dropdown-menu" id="nav-dropdown-cultes">
+        <div class="nav-dropdown-menu" id="nav-dd-cultes">
           <a href="#live" class="nav-dropdown-item" onclick="showSection('live',null);closeNavDropdown()">
             <i class="fa-solid fa-circle-dot blink" style="color:#da3f3f;font-size:.6rem"></i> Culte en Direct
           </a>
