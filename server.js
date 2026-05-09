@@ -1,6 +1,8 @@
 const path = require('path');
+const fs = require('fs');
 const http = require('http');
 const crypto = require('crypto');
+const multer = require('multer');
 const express = require('express');
 const session = require('express-session');
 const helmet = require('helmet');
@@ -830,6 +832,37 @@ app.get('/api/admin/push/stats', requireAdmin, (req, res) => {
   res.json({ total, actif });
 });
 
+// ─── UPLOAD PHOTOS MEMBRES ───────────────────────────────────────────────────
+
+const uploadsDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '') || '.jpg';
+    cb(null, `membre_${Date.now()}_${crypto.randomBytes(4).toString('hex')}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\/(jpeg|png|webp|gif)$/.test(file.mimetype)) cb(null, true);
+    else cb(new Error('TYPE_INVALIDE'));
+  },
+});
+
+app.post('/api/admin/upload-photo', requireAdmin, (req, res) => {
+  upload.single('photo')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message || 'UPLOAD_FAILED' });
+    if (!req.file) return res.status(400).json({ error: 'NO_FILE' });
+    res.json({ ok: true, url: `/uploads/${req.file.filename}` });
+  });
+});
+
+app.use('/uploads', express.static(uploadsDir));
 app.use(express.static(__dirname));
 
 httpServer.listen(PORT, () => {
