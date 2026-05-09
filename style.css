@@ -2762,7 +2762,10 @@ footer {
   z-index: 1100;
   }
 
-.nav-dropdown-menu.open {`n  display: block;`n  animation: dropdownIn .18s ease;`n}
+.nav-dropdown-menu.open {
+  display: block;
+  animation: dropdownIn .18s ease;
+}
 
 @keyframes dropdownIn {
   from { opacity: 0; transform: translateX(-50%) translateY(-6px); }
