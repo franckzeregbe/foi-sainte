@@ -616,6 +616,9 @@
             <button class="admin-sidenav-item" onclick="showAdminPanel('prieres', this)">
               <i class="fa-solid fa-hands-praying"></i> Prières
             </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('temoignages', this)">
+              <i class="fa-solid fa-star"></i> Témoignages
+            </button>
             <button class="admin-sidenav-item" onclick="showAdminPanel('push', this)">
               <i class="fa-solid fa-bell"></i> Notifications
             </button>
@@ -850,6 +853,15 @@
               <h3><i class="fa-solid fa-hands-praying"></i> Gérer les prières</h3>
               <p class="admin-help">Affiche les intentions partagées publiquement.</p>
               <div id="admin-prayers-list" class="admin-list"></div>
+            </div>
+          </div>
+
+          <!-- Panneau : Témoignages -->
+          <div class="admin-panel" id="admin-panel-temoignages">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-star"></i> Gérer les témoignages</h3>
+              <p class="admin-help">Témoignages soumis par la communauté.</p>
+              <div id="admin-temoignages-list" class="admin-list"></div>
             </div>
           </div>
 
