@@ -1196,6 +1196,19 @@ function applyVerseToLive() {
   saveLiveSettings();
 }
 
+function extractYoutubeId(input) {
+  const val = input.value.trim();
+  const match = val.match(
+    /(?:youtube\.com\/(?:watch\?v=|live\/|embed\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/
+  );
+  if (match) {
+    input.value = match[1];
+    input.style.borderColor = 'rgba(52,176,103,.7)';
+  } else {
+    input.style.borderColor = '';
+  }
+}
+
 async function saveLiveSettings() {
   const streamInput = document.getElementById('admin-stream-url');
   const liveVerseInput = document.getElementById('admin-live-verse');
