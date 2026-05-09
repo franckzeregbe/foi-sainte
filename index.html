@@ -28,8 +28,19 @@
     <nav id="nav">
       <a href="#accueil" class="nav-link active" onclick="showSection('accueil',this)">Accueil</a>
       <a href="#eglise" class="nav-link" onclick="showSection('eglise',this)">Notre Église</a>
-      <a href="#live" class="nav-link" onclick="showSection('live',this)">Culte en Direct</a>
-      <a href="#replays" class="nav-link" onclick="showSection('replays',this)">Revoir le Culte</a>
+      <div class="nav-dropdown">
+        <button class="nav-link nav-dropdown-btn" onclick="toggleNavDropdown(event)">
+          Cultes <i class="fa-solid fa-chevron-down nav-chevron"></i>
+        </button>
+        <div class="nav-dropdown-menu" id="nav-dropdown-cultes">
+          <a href="#live" class="nav-dropdown-item" onclick="showSection('live',null);closeNavDropdown()">
+            <i class="fa-solid fa-circle-dot blink" style="color:#da3f3f;font-size:.6rem"></i> Culte en Direct
+          </a>
+          <a href="#replays" class="nav-dropdown-item" onclick="showSection('replays',null);closeNavDropdown()">
+            <i class="fa-solid fa-film"></i> Revoir le Culte
+          </a>
+        </div>
+      </div>
       <a href="#priere" class="nav-link" onclick="showSection('priere',this)">Espace de Prière</a>
       <a href="#don" class="nav-link" onclick="showSection('don',this)">Faire un Don</a>
     </nav>
