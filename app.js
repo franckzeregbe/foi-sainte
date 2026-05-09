@@ -288,14 +288,20 @@ function renderAgenda(items) {
 }
 
 function applyPublicContentToUI() {
-  const dayIndex = new Date().getDate() % VERSETS.length;
-  const verse = APP_STATE.verse || VERSETS[dayIndex];
+  const daily = getDailyMessage();
+  const verse = APP_STATE.verse || daily;
+  const type = verse.type || daily.type || 'inspiration';
+  const cfg = TYPE_CONFIG[type] || TYPE_CONFIG.inspiration;
 
+  const label = document.getElementById('message-type-label');
   const verseText = document.getElementById('verset-texte');
   const verseRef = document.getElementById('verset-ref');
   const liveVerse = document.getElementById('live-verset-display');
   const frame = document.getElementById('yt-live-frame');
 
+  if (label) {
+    label.innerHTML = `<i class="fa-solid ${cfg.icon}"></i> <span style="color:${cfg.color};letter-spacing:2px">${cfg.label} DU JOUR</span>`;
+  }
   if (verseText) verseText.textContent = verse.texte;
   if (verseRef) verseRef.textContent = `- ${verse.ref} -`;
   if (liveVerse) liveVerse.textContent = APP_STATE.live.liveVerseText || `"${verse.texte}" - ${verse.ref}`;
