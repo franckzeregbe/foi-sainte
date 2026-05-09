@@ -1245,14 +1245,11 @@ async function saveDonationsSettings() {
 async function saveAdminVerse() {
   const textInput = document.getElementById('admin-verset-texte');
   const refInput = document.getElementById('admin-verset-ref');
-  const typeInput = document.getElementById('admin-message-type');
   if (!textInput || !refInput) return;
-
   const texte = textInput.value.trim();
   const ref = refInput.value.trim();
-  const type = typeInput ? typeInput.value : 'inspiration';
   if (!texte || !ref) { showToast('Saisissez le message et la référence.'); return; }
-
+  const type = detectMessageType(texte);
   try {
     await api('/api/admin/verse', { method: 'PUT', body: JSON.stringify({ texte, ref, type }) });
     APP_STATE.verse = { texte, ref, type };
@@ -1263,11 +1260,21 @@ async function saveAdminVerse() {
   }
 }
 
+function detectMessageType(texte) {
+  const t = texte.toLowerCase();
+  if (/pri[eè]|suppli|intercede|demande[zs]|implore/.test(t)) return 'priere';
+  if (/repent|confess|pardon|p[eé]ch[eé]|retourne[zs]|contrition/.test(t)) return 'repentance';
+  if (/loue[zs]|gloire|adore[zs]|b[eé]ni[st]|chante[zs]|digne/.test(t)) return 'louange';
+  if (/promesse|promis|je vous donnerai|je serai|il a promis/.test(t)) return 'promesse';
+  if (/foi|croi[st]|croyez|confiance|assurance|marchons/.test(t)) return 'foi';
+  if (/soyez forts|courage|r[eé]siste[zs]|combat|veillez|fortifi/.test(t)) return 'exhortation';
+  return 'inspiration';
+}
+
 function generateRandomMessage() {
   const msg = MESSAGES_DU_JOUR[Math.floor(Math.random() * MESSAGES_DU_JOUR.length)];
   document.getElementById('admin-verset-texte').value = msg.texte;
   document.getElementById('admin-verset-ref').value = msg.ref;
-  document.getElementById('admin-message-type').value = msg.type;
   showToast('Message généré — cliquez Enregistrer pour l’appliquer.');
 }
 
@@ -1275,7 +1282,6 @@ function restoreDailyMessage() {
   const msg = getDailyMessage();
   document.getElementById('admin-verset-texte').value = msg.texte;
   document.getElementById('admin-verset-ref').value = msg.ref;
-  document.getElementById('admin-message-type').value = msg.type;
   showToast('Message du jour restauré — cliquez Enregistrer pour l’appliquer.');
 }
 
