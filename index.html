@@ -27,6 +27,7 @@
     </div>
     <nav id="nav">
       <a href="#accueil" class="nav-link active" onclick="showSection('accueil',this)">Accueil</a>
+      <a href="#eglise" class="nav-link" onclick="showSection('eglise',this)">Notre Église</a>
       <a href="#live" class="nav-link" onclick="showSection('live',this)">Culte en Direct</a>
       <a href="#replays" class="nav-link" onclick="showSection('replays',this)">Revoir le Culte</a>
       <a href="#priere" class="nav-link" onclick="showSection('priere',this)">Espace de Prière</a>
@@ -119,6 +120,7 @@
         <div class="social-links">
           <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
           <a href="https://www.facebook.com/EgliseFOISAINTE/" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
+          <a href="https://www.instagram.com/eglisefoisainte/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
           <a href="https://wa.me/2250789362185" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
         </div>
       </div>
@@ -143,6 +145,119 @@
     </div>
   </div>
 
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION 1b — NOTRE ÉGLISE
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-eglise" class="section">
+  <div class="eglise-hero">
+    <div class="eglise-hero-overlay"></div>
+    <div class="eglise-hero-content">
+      <p class="hero-bienvenue">BIENVENUE DANS</p>
+      <h1 class="hero-title" id="eglise-nom-display">ÉGLISE FOI SAINTE</h1>
+      <p class="eglise-hero-sub" id="eglise-slogan-display">Édifiés sur la foi, marchant dans l'amour</p>
+    </div>
+  </div>
+
+  <!-- Vision & Mission -->
+  <div class="container">
+    <div class="eglise-vm-grid">
+      <div class="eglise-vm-card">
+        <div class="eglise-vm-icon"><i class="fa-solid fa-eye"></i></div>
+        <h3>Notre Vision</h3>
+        <p id="eglise-vision-display">Être une communauté de foi vivante, ancrée dans la Parole de Dieu, rayonnant l'amour du Christ dans toute la Côte d'Ivoire et au-delà.</p>
+      </div>
+      <div class="eglise-vm-card">
+        <div class="eglise-vm-icon"><i class="fa-solid fa-bullseye"></i></div>
+        <h3>Notre Mission</h3>
+        <p id="eglise-mission-display">Évangéliser, former des disciples, adorer Dieu en esprit et en vérité, et servir notre prochain avec amour et compassion.</p>
+      </div>
+      <div class="eglise-vm-card">
+        <div class="eglise-vm-icon"><i class="fa-solid fa-heart"></i></div>
+        <h3>Nos Valeurs</h3>
+        <p id="eglise-valeurs-display">Foi, Prière, Fraternité, Intégrité, Service. Nous croyons en la puissance transformatrice de l'Évangile de Jésus-Christ.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Histoire -->
+  <div class="eglise-histoire-section">
+    <div class="container">
+      <div class="eglise-histoire-inner">
+        <div class="eglise-histoire-text">
+          <p class="evb-label"><i class="fa-solid fa-book-open"></i> Notre Histoire</p>
+          <p id="eglise-histoire-display">L'Église FOI SAINTE a été fondée avec la conviction profonde que Dieu appelle son peuple à se bâtir sur une foi solide et inébranlable. Depuis notre création, nous avons grandi en nombre et en maturité spirituelle, portés par la grâce de Dieu et la fidélité de notre communauté.</p>
+        </div>
+        <div class="eglise-histoire-img">
+          <img src="logo-foi-sainte.jpg" alt="Église FOI SAINTE" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Horaires & Infos pratiques -->
+  <div class="container">
+    <h2 class="section-title"><i class="fa-regular fa-clock"></i> Horaires & Infos Pratiques</h2>
+    <div class="eglise-infos-grid">
+      <div class="eglise-info-card">
+        <i class="fa-solid fa-church"></i>
+        <h4>Culte Principal</h4>
+        <p id="eglise-horaire-culte-display">Dimanche — 10h00 à 13h00</p>
+      </div>
+      <div class="eglise-info-card">
+        <i class="fa-solid fa-book-bible"></i>
+        <h4>Étude Biblique</h4>
+        <p id="eglise-horaire-etude-display">Mercredi — 19h00 à 20h30</p>
+      </div>
+      <div class="eglise-info-card">
+        <i class="fa-solid fa-moon"></i>
+        <h4>Veillée de Prière</h4>
+        <p id="eglise-horaire-veillee-display">Vendredi — 21h00 à 00h00</p>
+      </div>
+      <div class="eglise-info-card">
+        <i class="fa-solid fa-location-dot"></i>
+        <h4>Adresse</h4>
+        <p id="eglise-adresse-display">Abidjan, Côte d'Ivoire</p>
+      </div>
+      <div class="eglise-info-card">
+        <i class="fa-solid fa-phone"></i>
+        <h4>Contact</h4>
+        <p id="eglise-contact-display">+225 07 89 36 21 85</p>
+      </div>
+      <div class="eglise-info-card">
+        <i class="fa-solid fa-envelope"></i>
+        <h4>Email</h4>
+        <p id="eglise-email-display">contact@foisainte.com</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pasteur / Équipe -->
+  <div class="eglise-equipe-section">
+    <div class="container">
+      <h2 class="section-title"><i class="fa-solid fa-users"></i> Notre Équipe Pastorale</h2>
+      <div class="eglise-equipe-grid" id="eglise-equipe-grid">
+        <!-- Rendu dynamique -->
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA rejoindre -->
+  <div class="eglise-cta-section">
+    <div class="eglise-cta-inner">
+      <h2>Rejoignez notre communauté</h2>
+      <p>Que vous soyez près ou loin, vous êtes les bienvenus parmi nous.</p>
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="showSection('live', document.querySelector('[href=\'#live\']'))">
+          <i class="fa-solid fa-circle-play"></i> Participer au Culte
+        </button>
+        <button class="btn-secondary" onclick="showSection('priere', document.querySelector('[href=\'#priere\']'))">
+          <i class="fa-solid fa-hands-praying"></i> Espace de Prière
+        </button>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════
@@ -314,12 +429,13 @@
 
     <div id="admin-login-card" class="admin-login-card">
       <h3><i class="fa-solid fa-user-shield"></i> Accès privé</h3>
-      <p>Entrez le code d'accès administrateur.</p>
+      <p>Entrez vos identifiants administrateur.</p>
       <div class="admin-login-row">
-        <input id="admin-pass" type="password" placeholder="Code d'accès" maxlength="40" />
+        <input id="admin-user" type="text" placeholder="Identifiant" maxlength="40" autocomplete="username" />
+        <input id="admin-pass" type="password" placeholder="Mot de passe" maxlength="100" autocomplete="current-password" />
         <button class="btn-primary" onclick="adminLogin()">Se connecter</button>
       </div>
-      <small>Au premier accès, entrez votre nouveau code pour l'initialiser.</small>
+      <small>Au premier accès, choisissez un identifiant et un mot de passe (min. 12 caractères).</small>
     </div>
 
     <div id="admin-dashboard" class="admin-dashboard" style="display:none">
@@ -346,6 +462,12 @@
             </button>
             <button class="admin-sidenav-item" onclick="showAdminPanel('replays', this)">
               <i class="fa-solid fa-film"></i> Replays
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('agenda', this)">
+              <i class="fa-regular fa-calendar"></i> Agenda
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('eglise', this)">
+              <i class="fa-solid fa-church"></i> Notre Église
             </button>
             <button class="admin-sidenav-item" onclick="showAdminPanel('prieres', this)">
               <i class="fa-solid fa-hands-praying"></i> Prières
@@ -467,6 +589,94 @@
             </div>
           </div>
 
+          <!-- Panneau : Agenda -->
+          <div class="admin-panel" id="admin-panel-agenda">
+            <div class="admin-card">
+              <h3><i class="fa-regular fa-calendar"></i> Gérer l'agenda des cultes</h3>
+              <p class="admin-help">Ajoutez, modifiez ou supprimez les prochains événements affichés sur la page d'accueil.</p>
+              <div class="agenda-admin-form" id="agenda-admin-form">
+                <div class="agenda-form-row">
+                  <div class="agenda-form-group">
+                    <label>Date</label>
+                    <input id="admin-agenda-date" type="text" placeholder="Ex : Dimanche 27 avril" />
+                  </div>
+                  <div class="agenda-form-group">
+                    <label>Type d'événement</label>
+                    <select id="admin-agenda-type">
+                      <option value="Culte principal">Culte principal</option>
+                      <option value="Etude biblique">Étude biblique</option>
+                      <option value="Veillee de priere">Veillée de prière</option>
+                      <option value="Jeune et priere">Jeûne et prière</option>
+                      <option value="Evenement special">Événement spécial</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="agenda-form-row">
+                  <div class="agenda-form-group">
+                    <label>Titre / Thème</label>
+                    <input id="admin-agenda-titre" type="text" placeholder="Ex : La puissance de la Foi" />
+                  </div>
+                  <div class="agenda-form-group">
+                    <label>Horaire</label>
+                    <input id="admin-agenda-heure" type="text" placeholder="Ex : 10h00 - 13h00" />
+                  </div>
+                </div>
+                <div class="agenda-form-actions">
+                  <button id="admin-agenda-submit" class="btn-primary" onclick="saveAgendaEvent()">
+                    <i class="fa-solid fa-plus"></i> <span id="agenda-submit-label">Ajouter l'événement</span>
+                  </button>
+                  <button class="btn-secondary" onclick="cancelEditAgenda()">
+                    <i class="fa-solid fa-xmark"></i> Annuler
+                  </button>
+                </div>
+              </div>
+              <div id="admin-agenda-list" class="agenda-admin-list"></div>
+            </div>
+          </div>
+
+          <!-- Panneau : Notre Église -->
+          <div class="admin-panel" id="admin-panel-eglise">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-church"></i> Présentation de l'Église</h3>
+              <p class="admin-help">Ces informations s'affichent dans la section publique "Notre Église".</p>
+              <label>Nom de l'église</label>
+              <input id="eglise-nom" type="text" placeholder="Ex : Église FOI SAINTE" />
+              <label>Slogan / Sous-titre</label>
+              <input id="eglise-slogan" type="text" placeholder="Ex : Édifiés sur la foi, marchant dans l'amour" />
+              <label>Vision</label>
+              <textarea id="eglise-vision" rows="3" placeholder="Notre vision..."></textarea>
+              <label>Mission</label>
+              <textarea id="eglise-mission" rows="3" placeholder="Notre mission..."></textarea>
+              <label>Valeurs</label>
+              <textarea id="eglise-valeurs" rows="2" placeholder="Nos valeurs..."></textarea>
+              <label>Histoire</label>
+              <textarea id="eglise-histoire" rows="4" placeholder="L'histoire de l'église..."></textarea>
+              <hr style="border-color:rgba(255,255,255,.1);margin:1rem 0" />
+              <h4 style="color:var(--gold-300);margin-bottom:.8rem"><i class="fa-regular fa-clock"></i> Horaires</h4>
+              <label>Culte principal</label>
+              <input id="eglise-horaire-culte" type="text" placeholder="Ex : Dimanche — 10h00 à 13h00" />
+              <label>Étude biblique</label>
+              <input id="eglise-horaire-etude" type="text" placeholder="Ex : Mercredi — 19h00 à 20h30" />
+              <label>Veillée de prière</label>
+              <input id="eglise-horaire-veillee" type="text" placeholder="Ex : Vendredi — 21h00 à 00h00" />
+              <hr style="border-color:rgba(255,255,255,.1);margin:1rem 0" />
+              <h4 style="color:var(--gold-300);margin-bottom:.8rem"><i class="fa-solid fa-location-dot"></i> Contact</h4>
+              <label>Adresse</label>
+              <input id="eglise-adresse" type="text" placeholder="Ex : Abidjan, Côte d'Ivoire" />
+              <label>Téléphone</label>
+              <input id="eglise-contact" type="text" placeholder="Ex : +225 07 89 36 21 85" />
+              <label>Email</label>
+              <input id="eglise-email" type="text" placeholder="Ex : contact@foisainte.com" />
+              <hr style="border-color:rgba(255,255,255,.1);margin:1rem 0" />
+              <h4 style="color:var(--gold-300);margin-bottom:.8rem"><i class="fa-solid fa-users"></i> Équipe pastorale</h4>
+              <p class="admin-help">Un membre par ligne : Nom | Rôle (ex: Pasteur Jean Dupont | Pasteur Principal)</p>
+              <textarea id="eglise-equipe" rows="5" placeholder="Pasteur Jean Dupont | Pasteur Principal&#10;Sœur Marie Koné | Responsable Louange&#10;Frère Paul Bamba | Diacre"></textarea>
+              <button class="btn-primary btn-full" onclick="saveEgliseSettings()">
+                <i class="fa-solid fa-floppy-disk"></i> Enregistrer la présentation
+              </button>
+            </div>
+          </div>
+
           <!-- Panneau : Replays -->
           <div class="admin-panel" id="admin-panel-replays">
             <div class="admin-card">
@@ -566,10 +776,12 @@
           <!-- Panneau : Sécurité -->
           <div class="admin-panel" id="admin-panel-securite">
             <div class="admin-card">
-              <h3><i class="fa-solid fa-shield-halved"></i> Changer le mot de passe admin</h3>
-              <p class="admin-help">Minimum 12 caractères. Après le changement, vous serez déconnecté et devrez vous reconnecter avec le nouveau mot de passe.</p>
+              <h3><i class="fa-solid fa-shield-halved"></i> Changer les identifiants admin</h3>
+              <p class="admin-help">Mot de passe minimum 12 caractères. Après le changement, vous serez déconnecté.</p>
               <label for="sec-current-pass">Mot de passe actuel</label>
               <input id="sec-current-pass" type="password" placeholder="Mot de passe actuel" maxlength="100" autocomplete="current-password" />
+              <label for="sec-new-username">Nouvel identifiant (optionnel)</label>
+              <input id="sec-new-username" type="text" placeholder="Laisser vide pour ne pas changer" maxlength="40" autocomplete="username" />
               <label for="sec-new-pass">Nouveau mot de passe</label>
               <input id="sec-new-pass" type="password" placeholder="Minimum 12 caractères" maxlength="100" autocomplete="new-password" />
               <label for="sec-confirm-pass">Confirmer le nouveau mot de passe</label>
@@ -579,7 +791,7 @@
               </div>
               <small id="sec-strength-label" class="admin-help" style="margin-bottom:.8rem;display:block"></small>
               <button class="btn-primary" onclick="changeAdminPassword()">
-                <i class="fa-solid fa-key"></i> Changer le mot de passe
+                <i class="fa-solid fa-key"></i> Changer les identifiants
               </button>
             </div>
           </div>
@@ -602,6 +814,7 @@
     </div>
     <div class="footer-links">
       <a onclick="showSection('accueil',null)">Accueil</a>
+      <a onclick="showSection('eglise',null)">Notre Église</a>
       <a onclick="showSection('live',null)">Culte en Direct</a>
       <a onclick="showSection('replays',null)">Replays</a>
       <a onclick="showSection('priere',null)">Prière</a>
@@ -610,6 +823,7 @@
     <div class="footer-social">
       <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank"><i class="fa-brands fa-youtube"></i></a>
       <a href="https://facebook.com/EgliseFoiSainte" target="_blank"><i class="fa-brands fa-facebook"></i></a>
+      <a href="https://www.instagram.com/eglisefoisainte/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
       <a href="https://wa.me/groupEgliseFoiSainte" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
     </div>
   </div>

@@ -10,6 +10,7 @@ const Database = require('better-sqlite3');
 const { Server: SocketIO } = require('socket.io');
 const webpush = require('web-push');
 const cron = require('node-cron');
+require('dotenv').config();
 
 const app = express();
 const httpServer = http.createServer(app);
@@ -66,11 +67,20 @@ function initDb() {
   db.exec(`
     CREATE TABLE IF NOT EXISTS admins (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL DEFAULT 'admin',
       password_hash TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+  `);
 
-    CREATE TABLE IF NOT EXISTS settings (
+  // Migration : ajouter la colonne username si elle n'existe pas
+  const cols = db.prepare("PRAGMA table_info(admins)").all().map(c => c.name);
+  if (!cols.includes('username')) {
+    db.exec("ALTER TABLE admins ADD COLUMN username TEXT NOT NULL DEFAULT 'admin'");
+  }
+
+  db.exec(`
+      CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
@@ -110,6 +120,15 @@ function initDb() {
       actif INTEGER NOT NULL DEFAULT 1,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS agenda (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      date_text TEXT NOT NULL,
+      type TEXT NOT NULL,
+      titre TEXT NOT NULL,
+      heure TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
 
   ensureSetting('verse', JSON.stringify(DEFAULT_VERSE));
@@ -120,6 +139,21 @@ function initDb() {
     isLive: false,
   }));
   ensureSetting('donations', JSON.stringify(DEFAULT_DONATIONS));
+  ensureSetting('eglise', JSON.stringify({
+    nom: 'Église FOI SAINTE',
+    slogan: 'Édifiés sur la foi, marchant dans l’amour',
+    vision: 'Être une communauté de foi vivante, ancrée dans la Parole de Dieu, rayonnant l’amour du Christ dans toute la Côte d’Ivoire et au-delà.',
+    mission: 'Évangéliser, former des disciples, adorer Dieu en esprit et en vérité, et servir notre prochain avec amour et compassion.',
+    valeurs: 'Foi, Prière, Fraternité, Intégrité, Service. Nous croyons en la puissance transformatrice de l’Évangile de Jésus-Christ.',
+    histoire: 'L’Église FOI SAINTE a été fondée avec la conviction profonde que Dieu appelle son peuple à se bâtir sur une foi solide et inébranlable. Depuis notre création, nous avons grandi en nombre et en maturité spirituelle, portés par la grâce de Dieu et la fidélité de notre communauté.',
+    horaireCulte: 'Dimanche — 10h00 à 13h00',
+    horaireEtude: 'Mercredi — 19h00 à 20h30',
+    horaireVeillee: 'Vendredi — 21h00 à 00h00',
+    adresse: 'Abidjan, Côte d’Ivoire',
+    contact: '+225 07 89 36 21 85',
+    email: 'contact@foisainte.com',
+    equipe: 'Pasteur | Pasteur Principal',
+  }));
 
   const replayCount = db.prepare('SELECT COUNT(*) AS c FROM replays').get().c;
   if (replayCount === 0) {
@@ -145,9 +179,35 @@ function initDb() {
     tx(DEFAULT_PRAYERS);
   }
 
+  const agendaCount = db.prepare('SELECT COUNT(*) AS c FROM agenda').get().c;
+  if (agendaCount === 0) {
+    const insertAgenda = db.prepare('INSERT INTO agenda (date_text, type, titre, heure, created_at) VALUES (?, ?, ?, ?, ?)');
+    const now = new Date().toISOString();
+    const txA = db.transaction(() => {
+      insertAgenda.run('Dimanche 27 avril', 'Culte principal', 'La puissance de la Foi', '10h00 - 13h00', now);
+      insertAgenda.run('Mercredi 30 avril', 'Etude biblique', 'Le livre de Job - Session 4', '19h00 - 20h30', now);
+      insertAgenda.run('Vendredi 2 mai', 'Veillee de priere', "Nuit de priere et d'adoration", '21h00 - 00h00', now);
+      insertAgenda.run('Dimanche 4 mai', 'Culte principal', "Marcher dans l'Esprit", '10h00 - 13h00', now);
+    });
+    txA();
+  }
+
   ensureStatKey('totalVisits');
   ensureStatKey('chatMessages');
   ensureStatKey('prayerRequests');
+}
+
+async function createDefaultAdmin() {
+  if (!needsSetup()) return;
+  const username = (process.env.ADMIN_DEFAULT_USERNAME || 'admin').trim();
+  const password = (process.env.ADMIN_DEFAULT_PASSWORD || '').trim();
+  if (!username || password.length < 12) {
+    console.warn('[FOI SAINTE] Aucun compte admin trouvé. Définissez ADMIN_DEFAULT_USERNAME et ADMIN_DEFAULT_PASSWORD (min 12 car.) dans .env');
+    return;
+  }
+  const hash = await bcrypt.hash(password, 12);
+  db.prepare('INSERT INTO admins (username, password_hash, created_at) VALUES (?, ?, ?)').run(username, hash, new Date().toISOString());
+  console.log(`[FOI SAINTE] Compte admin créé : "${username}" — Changez le mot de passe dès la première connexion.`);
 }
 
 function ensureSetting(key, defaultValue) {
@@ -203,6 +263,10 @@ function normalizeDonations(raw) {
 
 function getDonationsConfig() {
   return normalizeDonations(getSettingJson('donations', DEFAULT_DONATIONS));
+}
+
+function getAgenda() {
+  return db.prepare('SELECT id, date_text, type, titre, heure FROM agenda ORDER BY id ASC').all();
 }
 
 function getReplays() {
@@ -335,6 +399,7 @@ io.on('connection', (socket) => {
 initDb();
 initVapid();
 scheduleCron();
+createDefaultAdmin();
 
 if (TRUST_PROXY > 0) {
   app.set('trust proxy', TRUST_PROXY);
@@ -379,6 +444,8 @@ app.get('/api/public/content', (req, res) => {
     donations: getDonationsConfig(),
     replays: getReplays(),
     intentions: getSharedPrayers(),
+    agenda: getAgenda(),
+    eglise: getSettingJson('eglise', {}),
   });
 });
 
@@ -430,23 +497,29 @@ app.post('/api/admin/setup', authLimiter, async (req, res) => {
     return res.status(409).json({ error: 'ALREADY_SETUP' });
   }
 
+  const username = String(req.body?.username || '').trim();
   const password = String(req.body?.password || '').trim();
+
+  if (!username || username.length < 3) {
+    return res.status(400).json({ error: 'USERNAME_TOO_SHORT' });
+  }
   if (password.length < 12) {
     return res.status(400).json({ error: 'PASSWORD_TOO_SHORT' });
   }
 
   const hash = await bcrypt.hash(password, 12);
-  const result = db.prepare('INSERT INTO admins (password_hash, created_at) VALUES (?, ?)').run(hash, new Date().toISOString());
+  const result = db.prepare('INSERT INTO admins (username, password_hash, created_at) VALUES (?, ?, ?)').run(username, hash, new Date().toISOString());
   req.session.adminId = result.lastInsertRowid;
   res.json({ ok: true });
 });
 
 app.post('/api/admin/login', authLimiter, async (req, res) => {
+  const username = String(req.body?.username || '').trim();
   const password = String(req.body?.password || '').trim();
-  const admin = db.prepare('SELECT id, password_hash FROM admins LIMIT 1').get();
+  const admin = db.prepare('SELECT id, username, password_hash FROM admins WHERE username = ? LIMIT 1').get(username);
 
   if (!admin) {
-    return res.status(409).json({ error: 'NOT_SETUP' });
+    return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
   }
 
   const valid = await bcrypt.compare(password, admin.password_hash);
@@ -468,12 +541,13 @@ app.post('/api/admin/logout', (req, res) => {
 app.post('/api/admin/change-password', requireAdmin, authLimiter, async (req, res) => {
   const currentPassword = String(req.body?.currentPassword || '').trim();
   const newPassword = String(req.body?.newPassword || '').trim();
+  const newUsername = String(req.body?.newUsername || '').trim();
 
   if (newPassword.length < 12) {
     return res.status(400).json({ error: 'PASSWORD_TOO_SHORT' });
   }
 
-  const admin = db.prepare('SELECT id, password_hash FROM admins LIMIT 1').get();
+  const admin = db.prepare('SELECT id, password_hash FROM admins WHERE id = ?').get(req.session.adminId);
   if (!admin) return res.status(409).json({ error: 'NOT_SETUP' });
 
   const valid = await bcrypt.compare(currentPassword, admin.password_hash);
@@ -482,9 +556,12 @@ app.post('/api/admin/change-password', requireAdmin, authLimiter, async (req, re
   }
 
   const hash = await bcrypt.hash(newPassword, 12);
-  db.prepare('UPDATE admins SET password_hash = ? WHERE id = ?').run(hash, admin.id);
+  if (newUsername && newUsername.length >= 3) {
+    db.prepare('UPDATE admins SET username = ?, password_hash = ? WHERE id = ?').run(newUsername, hash, admin.id);
+  } else {
+    db.prepare('UPDATE admins SET password_hash = ? WHERE id = ?').run(hash, admin.id);
+  }
 
-  // Invalider la session courante pour forcer une reconnexion
   req.session.destroy(() => {
     res.clearCookie('foi_admin_sid');
     res.json({ ok: true });
@@ -498,6 +575,8 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
     donations: getDonationsConfig(),
     replays: getReplays(),
     prayers: getAllPrayers(),
+    agenda: getAgenda(),
+    eglise: getSettingJson('eglise', {}),
     stats: buildStats(todayKey()),
   });
 });
@@ -543,6 +622,24 @@ app.post('/api/admin/replays', requireAdmin, (req, res) => {
   res.json({ ok: true });
 });
 
+app.put('/api/admin/replays/:replayId', requireAdmin, (req, res) => {
+  const replayId = Number(req.params.replayId);
+  const yt_id = String(req.body?.id || '').trim();
+  const titre = String(req.body?.titre || '').trim();
+  const date = String(req.body?.date || '').trim();
+
+  if (!Number.isInteger(replayId) || replayId <= 0) {
+    return res.status(400).json({ error: 'INVALID_REPLAY_ID' });
+  }
+  if (!yt_id || !titre || !date) {
+    return res.status(400).json({ error: 'INVALID_PAYLOAD' });
+  }
+
+  db.prepare('UPDATE replays SET yt_id = ?, title = ?, date_text = ? WHERE id = ?')
+    .run(yt_id.slice(0, 80), titre.slice(0, 200), date.slice(0, 120), replayId);
+  res.json({ ok: true });
+});
+
 app.delete('/api/admin/replays/:id', requireAdmin, (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isInteger(id) || id <= 0) {
@@ -550,6 +647,45 @@ app.delete('/api/admin/replays/:id', requireAdmin, (req, res) => {
   }
   db.prepare('DELETE FROM replays WHERE id = ?').run(id);
   res.json({ ok: true });
+});
+
+app.post('/api/admin/agenda', requireAdmin, (req, res) => {
+  const date_text = String(req.body?.date_text || '').trim();
+  const type = String(req.body?.type || '').trim();
+  const titre = String(req.body?.titre || '').trim();
+  const heure = String(req.body?.heure || '').trim();
+  if (!date_text || !type || !titre || !heure) return res.status(400).json({ error: 'INVALID_PAYLOAD' });
+  db.prepare('INSERT INTO agenda (date_text, type, titre, heure, created_at) VALUES (?, ?, ?, ?, ?)')
+    .run(date_text.slice(0, 120), type.slice(0, 80), titre.slice(0, 200), heure.slice(0, 80), new Date().toISOString());
+  res.json({ ok: true });
+});
+
+app.put('/api/admin/agenda/:id', requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const date_text = String(req.body?.date_text || '').trim();
+  const type = String(req.body?.type || '').trim();
+  const titre = String(req.body?.titre || '').trim();
+  const heure = String(req.body?.heure || '').trim();
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'INVALID_ID' });
+  if (!date_text || !type || !titre || !heure) return res.status(400).json({ error: 'INVALID_PAYLOAD' });
+  db.prepare('UPDATE agenda SET date_text = ?, type = ?, titre = ?, heure = ? WHERE id = ?')
+    .run(date_text.slice(0, 120), type.slice(0, 80), titre.slice(0, 200), heure.slice(0, 80), id);
+  res.json({ ok: true });
+});
+
+app.delete('/api/admin/agenda/:id', requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'INVALID_ID' });
+  db.prepare('DELETE FROM agenda WHERE id = ?').run(id);
+  res.json({ ok: true });
+});
+
+app.put('/api/admin/eglise', requireAdmin, (req, res) => {
+  const fields = ['nom','slogan','vision','mission','valeurs','histoire','horaireCulte','horaireEtude','horaireVeillee','adresse','contact','email','equipe'];
+  const payload = {};
+  for (const f of fields) payload[f] = String(req.body?.[f] || '').trim().slice(0, 1000);
+  setSettingJson('eglise', payload);
+  res.json({ ok: true, eglise: payload });
 });
 
 app.delete('/api/admin/prayers/:id', requireAdmin, (req, res) => {

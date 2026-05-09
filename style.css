@@ -2235,3 +2235,473 @@ footer {
     height: 360px;
   }
 }
+
+/* ═══════════════════════════════════════════════════
+   SECTION NOTRE ÉGLISE
+═══════════════════════════════════════════════════ */
+
+#section-eglise {
+  background:
+    radial-gradient(ellipse at top right, rgba(200,169,81,.08), transparent 50%),
+    linear-gradient(180deg, #07101f 0%, #0c1a30 100%);
+  padding-bottom: 0;
+}
+
+.eglise-hero {
+  position: relative;
+  min-height: 42vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(180deg, rgba(4,10,20,.7) 0%, rgba(10,20,40,.4) 50%, rgba(4,10,20,.9) 100%),
+    url('https://images.unsplash.com/photo-1438232992991-995b671e4b8a?w=1400&q=80') center/cover no-repeat;
+  padding-top: 72px;
+}
+
+.eglise-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(200,169,81,.1), transparent 60%);
+}
+
+.eglise-hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.eglise-hero-sub {
+  color: var(--text-soft);
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-style: italic;
+  margin-top: .5rem;
+}
+
+/* Vision / Mission / Valeurs */
+.eglise-vm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  padding: 2.5rem 0;
+}
+
+.eglise-vm-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: transform .2s, border-color .2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.eglise-vm-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--logo-red), var(--logo-orange));
+}
+
+.eglise-vm-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(200,169,81,.35);
+}
+
+.eglise-vm-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(200,169,81,.15);
+  border: 2px solid rgba(200,169,81,.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.2rem;
+}
+
+.eglise-vm-icon i {
+  font-size: 1.5rem;
+  color: var(--gold-300);
+}
+
+.eglise-vm-card h3 {
+  font-family: var(--font-serif);
+  color: var(--white);
+  font-size: 1.1rem;
+  margin-bottom: .75rem;
+  letter-spacing: .5px;
+}
+
+.eglise-vm-card p {
+  color: var(--text-soft);
+  font-size: .93rem;
+  line-height: 1.7;
+}
+
+/* Histoire */
+.eglise-histoire-section {
+  background: rgba(255,255,255,.03);
+  border-top: 1px solid rgba(255,255,255,.07);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  padding: 3rem 0;
+}
+
+.eglise-histoire-inner {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 3rem;
+  align-items: center;
+}
+
+.eglise-histoire-text .evb-label {
+  margin-bottom: 1.2rem;
+}
+
+.eglise-histoire-text p {
+  color: var(--text-soft);
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+.eglise-histoire-img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.eglise-histoire-img img {
+  width: 200px;
+  height: 200px;
+  object-fit: contain;
+  border-radius: 50%;
+  background: rgba(255,255,255,.06);
+  padding: 1rem;
+  border: 2px solid rgba(200,169,81,.3);
+  box-shadow: 0 0 40px rgba(200,169,81,.15);
+}
+
+/* Infos pratiques */
+.eglise-infos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2.5rem;
+}
+
+.eglise-info-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 1.4rem 1.2rem;
+  text-align: center;
+  transition: transform .2s, border-color .2s;
+}
+
+.eglise-info-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(200,169,81,.3);
+}
+
+.eglise-info-card i {
+  font-size: 1.6rem;
+  color: var(--logo-orange);
+  margin-bottom: .7rem;
+  display: block;
+}
+
+.eglise-info-card h4 {
+  font-family: var(--font-serif);
+  color: var(--gold-300);
+  font-size: .85rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: .4rem;
+}
+
+.eglise-info-card p {
+  color: var(--text-soft);
+  font-size: .9rem;
+  line-height: 1.5;
+}
+
+/* Équipe */
+.eglise-equipe-section {
+  background: rgba(255,255,255,.02);
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding: 3rem 0;
+}
+
+.eglise-equipe-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-top: 1.5rem;
+}
+
+.equipe-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 1.8rem 1.5rem;
+  text-align: center;
+  min-width: 160px;
+  max-width: 200px;
+  flex: 1 1 160px;
+  transition: transform .2s, border-color .2s;
+}
+
+.equipe-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(200,169,81,.35);
+}
+
+.equipe-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--logo-red), var(--logo-orange));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  color: #fff;
+  font-weight: 700;
+  margin: 0 auto 1rem;
+  box-shadow: 0 4px 16px rgba(212,90,0,.3);
+}
+
+.equipe-nom {
+  font-family: var(--font-serif);
+  color: var(--white);
+  font-size: .95rem;
+  font-weight: 700;
+  margin-bottom: .3rem;
+}
+
+.equipe-role {
+  color: var(--gold-300);
+  font-size: .78rem;
+  letter-spacing: .8px;
+  text-transform: uppercase;
+}
+
+/* CTA rejoindre */
+.eglise-cta-section {
+  background: linear-gradient(135deg, rgba(212,90,0,.12), rgba(0,87,183,.12));
+  border-top: 1px solid rgba(200,169,81,.2);
+  padding: 3.5rem 1.5rem;
+  text-align: center;
+}
+
+.eglise-cta-inner h2 {
+  font-family: var(--font-serif);
+  color: var(--white);
+  font-size: clamp(1.4rem, 3vw, 2rem);
+  margin-bottom: .6rem;
+}
+
+.eglise-cta-inner p {
+  color: var(--text-soft);
+  margin-bottom: 1.8rem;
+  font-size: 1rem;
+}
+
+/* ═══════════════════════════════════════════════════
+   ADMIN AGENDA — REFONTE
+═══════════════════════════════════════════════════ */
+
+.agenda-admin-form {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px;
+  padding: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+.agenda-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: .75rem;
+  margin-bottom: .75rem;
+}
+
+.agenda-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: .3rem;
+}
+
+.agenda-form-group label {
+  color: var(--text-muted);
+  font-size: .8rem;
+  font-weight: 600;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+}
+
+.agenda-form-group input,
+.agenda-form-group select {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 10px;
+  padding: .7rem .9rem;
+  color: var(--white);
+  font-size: .9rem;
+  font-family: var(--font-main);
+  outline: none;
+  transition: border-color .2s;
+}
+
+.agenda-form-group input:focus,
+.agenda-form-group select:focus {
+  border-color: rgba(200,169,81,.6);
+}
+
+.agenda-form-group select option {
+  background: #0d1a2e;
+  color: var(--white);
+}
+
+.agenda-form-actions {
+  display: flex;
+  gap: .6rem;
+  flex-wrap: wrap;
+  margin-top: .5rem;
+}
+
+.agenda-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.agenda-admin-item {
+  display: flex;
+  align-items: center;
+  gap: .8rem;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 12px;
+  padding: .75rem 1rem;
+  transition: border-color .2s;
+}
+
+.agenda-admin-item--editing {
+  background: rgba(200,169,81,.08);
+  border-color: rgba(200,169,81,.4);
+}
+
+.agenda-admin-item-badge {
+  flex-shrink: 0;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .6px;
+  text-transform: uppercase;
+  padding: .25rem .6rem;
+  border-radius: 20px;
+  border: 1px solid;
+  white-space: nowrap;
+}
+
+.agenda-admin-item-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+
+.agenda-admin-item-body strong {
+  color: var(--white);
+  font-size: .9rem;
+}
+
+.agenda-admin-item-body span {
+  color: var(--text-soft);
+  font-size: .82rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.agenda-admin-item-body small {
+  color: var(--text-muted);
+  font-size: .75rem;
+}
+
+.agenda-admin-item-actions {
+  display: flex;
+  gap: .4rem;
+  flex-shrink: 0;
+}
+
+.agenda-btn-edit,
+.agenda-btn-delete {
+  border: none;
+  border-radius: 8px;
+  padding: .4rem .7rem;
+  font-size: .8rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: .3rem;
+  transition: filter .18s, transform .18s;
+}
+
+.agenda-btn-edit {
+  background: rgba(200,169,81,.18);
+  color: var(--gold-300);
+  border: 1px solid rgba(200,169,81,.35);
+}
+
+.agenda-btn-edit:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+.agenda-btn-delete {
+  background: rgba(220,50,50,.15);
+  color: #f87171;
+  border: 1px solid rgba(220,50,50,.3);
+}
+
+.agenda-btn-delete:hover {
+  filter: brightness(1.2);
+  transform: translateY(-1px);
+}
+
+/* Responsive Notre Église */
+@media (max-width: 900px) {
+  .eglise-histoire-inner {
+    grid-template-columns: 1fr;
+  }
+  .eglise-histoire-img {
+    display: none;
+  }
+  .agenda-form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .eglise-vm-grid,
+  .eglise-infos-grid {
+    grid-template-columns: 1fr;
+  }
+  .agenda-admin-item {
+    flex-wrap: wrap;
+  }
+  .agenda-admin-item-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

@@ -53,7 +53,11 @@ const APP_STATE = {
   },
   replays: [],
   intentions: [],
+  agenda: [],
+  eglise: {},
   adminPrayers: [],
+  editingReplayId: null,
+  editingAgendaId: null,
   stats: {
     totalVisits: 0,
     uniqueVisitorsToday: 0,
@@ -144,7 +148,7 @@ function toggleMenu() {
 
 function handleHashNav() {
   const hash = location.hash.replace('#', '');
-  const validIds = ['accueil', 'live', 'replays', 'priere', 'don', 'admin'];
+  const validIds = ['accueil', 'eglise', 'live', 'replays', 'priere', 'don', 'admin'];
   if (hash && validIds.includes(hash)) {
     const link = document.querySelector(`[href="#${hash}"]`);
     showSection(hash, link);
@@ -178,6 +182,12 @@ function initHomeClock() {
 function initAgenda() {
   const grid = document.getElementById('agenda-grid');
   if (!grid) return;
+  renderAgenda(APP_STATE.agenda);
+}
+
+function renderAgenda(items) {
+  const grid = document.getElementById('agenda-grid');
+  if (!grid) return;
 
   const typeMap = (type) => {
     const t = type.toLowerCase();
@@ -187,12 +197,12 @@ function initAgenda() {
     return 'culte';
   };
 
-  grid.innerHTML = AGENDA.map((ev) => `
+  grid.innerHTML = items.map((ev) => `
     <div class="agenda-card" data-type="${typeMap(ev.type)}">
-      <div class="agenda-date">${ev.date}</div>
-      <div class="agenda-type">${ev.type}</div>
-      <div class="agenda-titre">${ev.titre}</div>
-      <div class="agenda-heure"><i class="fa-regular fa-clock"></i> ${ev.heure}</div>
+      <div class="agenda-date">${escapeHtml(ev.date_text)}</div>
+      <div class="agenda-type">${escapeHtml(ev.type)}</div>
+      <div class="agenda-titre">${escapeHtml(ev.titre)}</div>
+      <div class="agenda-heure"><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.heure)}</div>
     </div>
   `).join('');
 }
@@ -214,6 +224,8 @@ function applyPublicContentToUI() {
   renderDonationMethods();
   renderIntentions();
   renderReplays();
+  renderAgenda(APP_STATE.agenda);
+  renderEglise(APP_STATE.eglise);
 }
 
 function renderDonationMethods() {
@@ -740,6 +752,8 @@ async function loadPublicContent() {
     APP_STATE.donations = data.donations || APP_STATE.donations;
     APP_STATE.replays = Array.isArray(data.replays) ? data.replays : [];
     APP_STATE.intentions = Array.isArray(data.intentions) ? data.intentions : [];
+    APP_STATE.agenda = Array.isArray(data.agenda) ? data.agenda : [];
+    APP_STATE.eglise = data.eglise || APP_STATE.eglise;
     applyPublicContentToUI();
     checkLiveStatus();
   } catch {
@@ -791,8 +805,14 @@ function updateStatsUi() {
 
 async function initAdmin() {
   const input = document.getElementById('admin-pass');
+  const userInput = document.getElementById('admin-user');
   if (input) {
     input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') adminLogin();
+    });
+  }
+  if (userInput) {
+    userInput.addEventListener('keydown', (event) => {
       if (event.key === 'Enter') adminLogin();
     });
   }
@@ -805,7 +825,10 @@ async function initAdmin() {
   } else {
     closeAdminDashboard();
     if (input) {
-      input.placeholder = APP_STATE.adminStatus.needsSetup ? 'Definir le code admin (premier acces)' : 'Code d\'acces';
+      input.placeholder = APP_STATE.adminStatus.needsSetup ? 'Choisir un mot de passe (premier accès)' : 'Mot de passe';
+    }
+    if (userInput) {
+      userInput.placeholder = APP_STATE.adminStatus.needsSetup ? 'Choisir un identifiant' : 'Identifiant';
     }
   }
 }
@@ -820,34 +843,50 @@ async function refreshAdminStatus() {
 
 async function adminLogin() {
   const input = document.getElementById('admin-pass');
+  const userInput = document.getElementById('admin-user');
   if (!input) return;
 
+  const username = (userInput && userInput.value.trim()) || '';
   const password = input.value.trim();
+
+  if (!username) {
+    showToast('Saisissez un identifiant.');
+    if (userInput) userInput.focus();
+    return;
+  }
   if (!password) {
-    showToast('Saisissez un code d\'acces.');
+    showToast('Saisissez un mot de passe.');
     return;
   }
 
   try {
-    // Toujours rafraîchir le statut avant d'envoyer pour éviter un endpoint décalé
     await refreshAdminStatus();
     const endpoint = APP_STATE.adminStatus.needsSetup ? '/api/admin/setup' : '/api/admin/login';
     await api(endpoint, {
       method: 'POST',
-      body: JSON.stringify({ password }),
+      body: JSON.stringify({ username, password }),
     });
 
     input.value = '';
+    if (userInput) userInput.value = '';
     await refreshAdminStatus();
     openAdminDashboard();
     await loadAdminDashboard();
-    showToast(APP_STATE.adminStatus.needsSetup ? 'Acces admin initialise.' : 'Connexion admin reussie.');
+    showToast('Connexion admin réussie.');
   } catch (err) {
     if (err.status === 429) {
-      showToast('Trop de tentatives. Reessayez plus tard.');
+      showToast('Trop de tentatives. Réessayez plus tard.');
       return;
     }
-    showToast('Code admin invalide ou configuration impossible.');
+    if (err.payload?.error === 'USERNAME_TOO_SHORT') {
+      showToast('L\'identifiant doit faire au moins 3 caractères.');
+      return;
+    }
+    if (err.payload?.error === 'PASSWORD_TOO_SHORT') {
+      showToast('Le mot de passe doit faire au moins 12 caractères.');
+      return;
+    }
+    showToast('Identifiant ou mot de passe incorrect.');
     await refreshAdminStatus();
   }
 }
@@ -868,26 +907,30 @@ async function changeAdminPassword() {
   const currentPass = document.getElementById('sec-current-pass');
   const newPass = document.getElementById('sec-new-pass');
   const confirmPass = document.getElementById('sec-confirm-pass');
+  const newUsername = document.getElementById('sec-new-username');
 
   if (!currentPass || !newPass || !confirmPass) return;
 
   const current = currentPass.value.trim();
   const next = newPass.value.trim();
   const confirm = confirmPass.value.trim();
+  const username = newUsername ? newUsername.value.trim() : '';
 
   if (!current) { showToast('Saisissez votre mot de passe actuel.'); return; }
   if (next.length < 12) { showToast('Le nouveau mot de passe doit faire au moins 12 caractères.'); return; }
   if (next !== confirm) { showToast('Les deux mots de passe ne correspondent pas.'); return; }
+  if (username && username.length < 3) { showToast('Le nouvel identifiant doit faire au moins 3 caractères.'); return; }
 
   try {
     await api('/api/admin/change-password', {
       method: 'POST',
-      body: JSON.stringify({ currentPassword: current, newPassword: next }),
+      body: JSON.stringify({ currentPassword: current, newPassword: next, newUsername: username || undefined }),
     });
     currentPass.value = '';
     newPass.value = '';
     confirmPass.value = '';
-    showToast('Mot de passe changé. Reconnectez-vous.');
+    if (newUsername) newUsername.value = '';
+    showToast('Identifiants changés. Reconnectez-vous.');
     await refreshAdminStatus();
     closeAdminDashboard();
   } catch (err) {
@@ -896,7 +939,7 @@ async function changeAdminPassword() {
     } else if (err.status === 400) {
       showToast('Le nouveau mot de passe doit faire au moins 12 caractères.');
     } else {
-      showToast('Erreur lors du changement de mot de passe.');
+      showToast('Erreur lors du changement des identifiants.');
     }
   }
 }
@@ -990,11 +1033,15 @@ async function loadAdminDashboard() {
     APP_STATE.donations = data.donations || APP_STATE.donations;
     APP_STATE.replays = Array.isArray(data.replays) ? data.replays : APP_STATE.replays;
     APP_STATE.adminPrayers = Array.isArray(data.prayers) ? data.prayers : [];
+    APP_STATE.agenda = Array.isArray(data.agenda) ? data.agenda : APP_STATE.agenda;
+    APP_STATE.eglise = data.eglise || APP_STATE.eglise;
     APP_STATE.stats = data.stats || APP_STATE.stats;
 
     fillAdminForms();
     renderAdminReplays();
     renderAdminPrayers();
+    renderAdminAgenda();
+    fillEgliseForms();
     updateStatsUi();
     applyPublicContentToUI();
     checkLiveStatus();
@@ -1194,25 +1241,59 @@ async function addReplayFromAdmin() {
   }
 
   try {
-    await api('/api/admin/replays', {
-      method: 'POST',
-      body: JSON.stringify({ id, titre, date }),
-    });
+    if (APP_STATE.editingReplayId) {
+      await api(`/api/admin/replays/${APP_STATE.editingReplayId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ id, titre, date }),
+      });
+      showToast('Replay modifie.');
+    } else {
+      await api('/api/admin/replays', {
+        method: 'POST',
+        body: JSON.stringify({ id, titre, date }),
+      });
+      showToast('Replay ajoute.');
+    }
 
     idInput.value = '';
     titleInput.value = '';
     dateInput.value = '';
+    APP_STATE.editingReplayId = null;
+    cancelEditReplay();
     await loadPublicContent();
     await loadAdminDashboard();
-    showToast('Replay ajoute.');
   } catch {
-    showToast('Impossible d\'ajouter le replay.');
+    showToast('Operation impossible.');
   }
 }
 
+function editReplay(dbId, id, titre, date) {
+  APP_STATE.editingReplayId = dbId;
+  document.getElementById('admin-replay-id').value = id;
+  document.getElementById('admin-replay-title').value = titre;
+  document.getElementById('admin-replay-date').value = date;
+  const btn = document.querySelector('[onclick="addReplayFromAdmin()"]');
+  if (btn) btn.textContent = 'Enregistrer les modifications';
+  renderAdminReplays();
+}
+
+function cancelEditReplay() {
+  APP_STATE.editingReplayId = null;
+  document.getElementById('admin-replay-id').value = '';
+  document.getElementById('admin-replay-title').value = '';
+  document.getElementById('admin-replay-date').value = '';
+  const btn = document.querySelector('[onclick="addReplayFromAdmin()"]');
+  if (btn) btn.textContent = 'Ajouter le replay';
+  renderAdminReplays();
+}
+
 async function removeReplay(dbId) {
+  if (!confirm('Supprimer ce replay ?')) return;
   try {
     await api(`/api/admin/replays/${dbId}`, { method: 'DELETE' });
+    if (APP_STATE.editingReplayId === dbId) {
+      cancelEditReplay();
+    }
     await loadPublicContent();
     await loadAdminDashboard();
     showToast('Replay supprime.');
@@ -1231,14 +1312,192 @@ function renderAdminReplays() {
   }
 
   list.innerHTML = APP_STATE.replays.map((video) => `
-    <div class="admin-list-item">
+    <div class="admin-list-item" style="${APP_STATE.editingReplayId === video.dbId ? 'background:rgba(200,169,81,.1);border:1px solid rgba(200,169,81,.3)' : ''}">
       <div>
         <strong>${escapeHtml(video.titre)}</strong>
         <small>${escapeHtml(video.date)} - ID: ${escapeHtml(video.id)}</small>
       </div>
-      <button class="btn-secondary" onclick="removeReplay(${Number(video.dbId)})">Supprimer</button>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn-secondary" onclick="editReplay(${Number(video.dbId)}, '${video.id.replace(/'/g, "\\'")}', '${video.titre.replace(/'/g, "\\'")}', '${video.date.replace(/'/g, "\\'")}')" style="flex:1;min-width:80px">${APP_STATE.editingReplayId === video.dbId ? 'En édition ✎' : 'Éditer'}</button>
+        <button class="btn-secondary" onclick="removeReplay(${Number(video.dbId)})" style="flex:1;min-width:80px">Supprimer</button>
+      </div>
     </div>
   `).join('');
+}
+
+function renderAdminAgenda() {
+  const list = document.getElementById('admin-agenda-list');
+  if (!list) return;
+
+  if (!APP_STATE.agenda.length) {
+    list.innerHTML = '<p class="admin-empty"><i class="fa-regular fa-calendar-xmark"></i> Aucun événement programmé.</p>';
+    return;
+  }
+
+  const typeColors = {
+    'culte': { bg: 'rgba(212,90,0,.18)', border: 'rgba(212,90,0,.5)', color: '#ff8c3a' },
+    'etude': { bg: 'rgba(0,87,183,.18)', border: 'rgba(0,87,183,.5)', color: '#7ab3ff' },
+    'veillee': { bg: 'rgba(91,14,166,.18)', border: 'rgba(91,14,166,.5)', color: '#c084fc' },
+    'default': { bg: 'rgba(200,169,81,.12)', border: 'rgba(200,169,81,.4)', color: '#edd88f' },
+  };
+  const getTypeKey = (t) => {
+    const s = t.toLowerCase();
+    if (s.includes('culte')) return 'culte';
+    if (s.includes('etude') || s.includes('étude')) return 'etude';
+    if (s.includes('veillee') || s.includes('veillée') || s.includes('jeune')) return 'veillee';
+    return 'default';
+  };
+
+  list.innerHTML = APP_STATE.agenda.map((ev) => {
+    const tk = getTypeKey(ev.type);
+    const c = typeColors[tk];
+    const isEditing = APP_STATE.editingAgendaId === ev.id;
+    return `
+    <div class="agenda-admin-item${isEditing ? ' agenda-admin-item--editing' : ''}">
+      <div class="agenda-admin-item-badge" style="background:${c.bg};border-color:${c.border};color:${c.color}">
+        ${escapeHtml(ev.type)}
+      </div>
+      <div class="agenda-admin-item-body">
+        <strong>${escapeHtml(ev.date_text)}</strong>
+        <span>${escapeHtml(ev.titre)}</span>
+        <small><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.heure)}</small>
+      </div>
+      <div class="agenda-admin-item-actions">
+        <button class="agenda-btn-edit" onclick="editAgenda(${ev.id},'${ev.date_text.replace(/'/g,"\\'")}',' ${ev.type.replace(/'/g,"\\'")}',' ${ev.titre.replace(/'/g,"\\'")}',' ${ev.heure.replace(/'/g,"\\'")}')">
+          <i class="fa-solid fa-pen"></i>${isEditing ? ' En cours' : ' Éditer'}
+        </button>
+        <button class="agenda-btn-delete" onclick="removeAgenda(${ev.id})">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function editAgenda(id, date_text, type, titre, heure) {
+  APP_STATE.editingAgendaId = id;
+  document.getElementById('admin-agenda-date').value = date_text.trim();
+  const sel = document.getElementById('admin-agenda-type');
+  if (sel) {
+    const opt = [...sel.options].find(o => o.value.toLowerCase() === type.trim().toLowerCase());
+    if (opt) sel.value = opt.value; else sel.value = sel.options[0].value;
+  }
+  document.getElementById('admin-agenda-titre').value = titre.trim();
+  document.getElementById('admin-agenda-heure').value = heure.trim();
+  const lbl = document.getElementById('agenda-submit-label');
+  if (lbl) lbl.textContent = 'Enregistrer les modifications';
+  document.getElementById('agenda-admin-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  renderAdminAgenda();
+}
+
+function cancelEditAgenda() {
+  APP_STATE.editingAgendaId = null;
+  ['admin-agenda-date','admin-agenda-titre','admin-agenda-heure'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const sel = document.getElementById('admin-agenda-type');
+  if (sel) sel.selectedIndex = 0;
+  const lbl = document.getElementById('agenda-submit-label');
+  if (lbl) lbl.textContent = 'Ajouter l\'événement';
+  renderAdminAgenda();
+}
+
+async function saveAgendaEvent() {
+  const date_text = document.getElementById('admin-agenda-date')?.value.trim();
+  const type = document.getElementById('admin-agenda-type')?.value.trim();
+  const titre = document.getElementById('admin-agenda-titre')?.value.trim();
+  const heure = document.getElementById('admin-agenda-heure')?.value.trim();
+
+  if (!date_text || !type || !titre || !heure) {
+    showToast('Complétez tous les champs.');
+    return;
+  }
+
+  try {
+    if (APP_STATE.editingAgendaId) {
+      await api(`/api/admin/agenda/${APP_STATE.editingAgendaId}`, { method: 'PUT', body: JSON.stringify({ date_text, type, titre, heure }) });
+      showToast('Événement modifié.');
+    } else {
+      await api('/api/admin/agenda', { method: 'POST', body: JSON.stringify({ date_text, type, titre, heure }) });
+      showToast('Événement ajouté.');
+    }
+    cancelEditAgenda();
+    await loadPublicContent();
+    await loadAdminDashboard();
+  } catch {
+    showToast('Opération impossible.');
+  }
+}
+
+async function removeAgenda(id) {
+  if (!confirm('Supprimer cet événement ?')) return;
+  try {
+    await api(`/api/admin/agenda/${id}`, { method: 'DELETE' });
+    if (APP_STATE.editingAgendaId === id) cancelEditAgenda();
+    await loadPublicContent();
+    await loadAdminDashboard();
+    showToast('Événement supprimé.');
+  } catch {
+    showToast('Suppression impossible.');
+  }
+}
+
+function renderEglise(e) {
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || el.textContent; };
+  set('eglise-nom-display', e.nom);
+  set('eglise-slogan-display', e.slogan);
+  set('eglise-vision-display', e.vision);
+  set('eglise-mission-display', e.mission);
+  set('eglise-valeurs-display', e.valeurs);
+  set('eglise-histoire-display', e.histoire);
+  set('eglise-horaire-culte-display', e.horaireCulte);
+  set('eglise-horaire-etude-display', e.horaireEtude);
+  set('eglise-horaire-veillee-display', e.horaireVeillee);
+  set('eglise-adresse-display', e.adresse);
+  set('eglise-contact-display', e.contact);
+  set('eglise-email-display', e.email);
+
+  const grid = document.getElementById('eglise-equipe-grid');
+  if (grid && e.equipe) {
+    const membres = e.equipe.split('\n').map(l => l.trim()).filter(Boolean);
+    grid.innerHTML = membres.map(m => {
+      const [nom, role] = m.split('|').map(s => s.trim());
+      const initials = (nom || '?').substring(0, 2).toUpperCase();
+      return `
+        <div class="equipe-card">
+          <div class="equipe-avatar">${escapeHtml(initials)}</div>
+          <div class="equipe-nom">${escapeHtml(nom || '')}</div>
+          <div class="equipe-role">${escapeHtml(role || '')}</div>
+        </div>`;
+    }).join('');
+  }
+}
+
+function fillEgliseForms() {
+  const e = APP_STATE.eglise || {};
+  const fields = ['nom','slogan','vision','mission','valeurs','histoire','horaireCulte','horaireEtude','horaireVeillee','adresse','contact','email','equipe'];
+  fields.forEach(f => {
+    const el = document.getElementById('eglise-' + f.replace(/([A-Z])/g, '-$1').toLowerCase());
+    if (el) el.value = e[f] || '';
+  });
+}
+
+async function saveEgliseSettings() {
+  const fields = ['nom','slogan','vision','mission','valeurs','histoire','horaireCulte','horaireEtude','horaireVeillee','adresse','contact','email','equipe'];
+  const payload = {};
+  fields.forEach(f => {
+    const el = document.getElementById('eglise-' + f.replace(/([A-Z])/g, '-$1').toLowerCase());
+    payload[f] = el ? el.value.trim() : '';
+  });
+  try {
+    const data = await api('/api/admin/eglise', { method: 'PUT', body: JSON.stringify(payload) });
+    APP_STATE.eglise = data.eglise || payload;
+    renderEglise(APP_STATE.eglise);
+    showToast('Présentation de l\'église enregistrée.');
+  } catch {
+    showToast('Impossible de sauvegarder.');
+  }
 }
 
 function renderAdminPrayers() {
