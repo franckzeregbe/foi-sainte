@@ -1245,26 +1245,38 @@ async function saveDonationsSettings() {
 async function saveAdminVerse() {
   const textInput = document.getElementById('admin-verset-texte');
   const refInput = document.getElementById('admin-verset-ref');
+  const typeInput = document.getElementById('admin-message-type');
   if (!textInput || !refInput) return;
 
   const texte = textInput.value.trim();
   const ref = refInput.value.trim();
-  if (!texte || !ref) {
-    showToast('Saisissez texte et reference.');
-    return;
-  }
+  const type = typeInput ? typeInput.value : 'inspiration';
+  if (!texte || !ref) { showToast('Saisissez le message et la référence.'); return; }
 
   try {
-    await api('/api/admin/verse', {
-      method: 'PUT',
-      body: JSON.stringify({ texte, ref }),
-    });
-    APP_STATE.verse = { texte, ref };
+    await api('/api/admin/verse', { method: 'PUT', body: JSON.stringify({ texte, ref, type }) });
+    APP_STATE.verse = { texte, ref, type };
     applyPublicContentToUI();
-    showToast('Verset du jour mis a jour.');
+    showToast('Message du jour mis à jour.');
   } catch {
-    showToast('Impossible de sauvegarder le verset.');
+    showToast('Impossible de sauvegarder le message.');
   }
+}
+
+function generateRandomMessage() {
+  const msg = MESSAGES_DU_JOUR[Math.floor(Math.random() * MESSAGES_DU_JOUR.length)];
+  document.getElementById('admin-verset-texte').value = msg.texte;
+  document.getElementById('admin-verset-ref').value = msg.ref;
+  document.getElementById('admin-message-type').value = msg.type;
+  showToast('Message généré — cliquez Enregistrer pour l’appliquer.');
+}
+
+function restoreDailyMessage() {
+  const msg = getDailyMessage();
+  document.getElementById('admin-verset-texte').value = msg.texte;
+  document.getElementById('admin-verset-ref').value = msg.ref;
+  document.getElementById('admin-message-type').value = msg.type;
+  showToast('Message du jour restauré — cliquez Enregistrer pour l’appliquer.');
 }
 
 function applyVerseToLive() {
