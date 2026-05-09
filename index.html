@@ -177,9 +177,9 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════
-     SECTION 1b — NOTRE ÉGLISE
+     SECTION — PRÉSENTATION
 ═══════════════════════════════════════════════════════════════ -->
-<section id="section-eglise" class="section">
+<section id="section-presentation" class="section">
   <div class="eglise-hero">
     <div class="eglise-hero-overlay"></div>
     <div class="eglise-hero-content">
@@ -188,47 +188,8 @@
       <p class="eglise-hero-sub" id="eglise-slogan-display">Édifiés sur la foi, marchant dans l'amour</p>
     </div>
   </div>
-
-  <!-- Vision & Mission -->
   <div class="container">
-    <div class="eglise-vm-grid">
-      <div class="eglise-vm-card">
-        <div class="eglise-vm-icon"><i class="fa-solid fa-eye"></i></div>
-        <h3>Notre Vision</h3>
-        <p id="eglise-vision-display">Être une communauté de foi vivante, ancrée dans la Parole de Dieu, rayonnant l'amour du Christ dans toute la Côte d'Ivoire et au-delà.</p>
-      </div>
-      <div class="eglise-vm-card">
-        <div class="eglise-vm-icon"><i class="fa-solid fa-bullseye"></i></div>
-        <h3>Notre Mission</h3>
-        <p id="eglise-mission-display">Évangéliser, former des disciples, adorer Dieu en esprit et en vérité, et servir notre prochain avec amour et compassion.</p>
-      </div>
-      <div class="eglise-vm-card">
-        <div class="eglise-vm-icon"><i class="fa-solid fa-heart"></i></div>
-        <h3>Nos Valeurs</h3>
-        <p id="eglise-valeurs-display">Foi, Prière, Fraternité, Intégrité, Service. Nous croyons en la puissance transformatrice de l'Évangile de Jésus-Christ.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- Histoire -->
-  <div class="eglise-histoire-section">
-    <div class="container">
-      <div class="eglise-histoire-inner">
-        <div class="eglise-histoire-text">
-          <p class="evb-label"><i class="fa-solid fa-book-open"></i> Notre Histoire</p>
-          <p id="eglise-histoire-display">L'Église FOI SAINTE a été fondée avec la conviction profonde que Dieu appelle son peuple à se bâtir sur une foi solide et inébranlable. Depuis notre création, nous avons grandi en nombre et en maturité spirituelle, portés par la grâce de Dieu et la fidélité de notre communauté.</p>
-        </div>
-        <div class="eglise-histoire-img">
-          <img src="logo-foi-sainte.jpg" alt="Église FOI SAINTE" />
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Horaires & Infos pratiques -->
-  <div class="container">
-    <h2 class="section-title"><i class="fa-regular fa-clock"></i> Horaires & Infos Pratiques</h2>
-    <div class="eglise-infos-grid">
+    <div class="eglise-infos-grid" style="margin-top:2.5rem">
       <div class="eglise-info-card">
         <i class="fa-solid fa-church"></i>
         <h4>Culte Principal</h4>
@@ -260,30 +221,119 @@
         <p id="eglise-email-display">contact@foisainte.com</p>
       </div>
     </div>
+    <div class="eglise-nav-cards">
+      <button class="eglise-nav-card" onclick="showSection('vision',null)">
+        <i class="fa-solid fa-eye"></i>
+        <span>Vision &amp; Mission</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <button class="eglise-nav-card" onclick="showSection('histoire',null)">
+        <i class="fa-solid fa-book-open"></i>
+        <span>Notre Histoire</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+      <button class="eglise-nav-card" onclick="showSection('equipe',null)">
+        <i class="fa-solid fa-users"></i>
+        <span>Équipe Pastorale</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
   </div>
+</section>
 
-  <!-- Pasteur / Équipe -->
-  <div class="eglise-equipe-section">
-    <div class="container">
-      <h2 class="section-title"><i class="fa-solid fa-users"></i> Notre Équipe Pastorale</h2>
-      <div class="eglise-equipe-grid" id="eglise-equipe-grid">
-        <!-- Rendu dynamique -->
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION — VISION & MISSION
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-vision" class="section">
+  <div class="sous-section-hero" style="--accent:#d4af37">
+    <div class="sous-section-hero-inner">
+      <i class="fa-solid fa-eye sous-section-icon"></i>
+      <h1>Vision &amp; Mission</h1>
+      <p>Église FOI SAINTE — Andrés sur la Parole de Dieu</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="eglise-vm-grid" style="margin-top:2.5rem">
+      <div class="eglise-vm-card">
+        <div class="eglise-vm-icon"><i class="fa-solid fa-eye"></i></div>
+        <h3>Notre Vision</h3>
+        <p id="eglise-vision-display">Être une communauté de foi vivante, ancrée dans la Parole de Dieu, rayonnant l'amour du Christ dans toute la Côte d'Ivoire et au-delà.</p>
+      </div>
+      <div class="eglise-vm-card">
+        <div class="eglise-vm-icon"><i class="fa-solid fa-bullseye"></i></div>
+        <h3>Notre Mission</h3>
+        <p id="eglise-mission-display">Évangéliser, former des disciples, adorer Dieu en esprit et en vérité, et servir notre prochain avec amour et compassion.</p>
+      </div>
+      <div class="eglise-vm-card">
+        <div class="eglise-vm-icon"><i class="fa-solid fa-heart"></i></div>
+        <h3>Nos Valeurs</h3>
+        <p id="eglise-valeurs-display">Foi, Prière, Fraternité, Intégrité, Service. Nous croyons en la puissance transformatrice de l'Évangile de Jésus-Christ.</p>
+      </div>
+    </div>
+    <div class="eglise-cta-section" style="margin-top:2rem">
+      <div class="eglise-cta-inner">
+        <h2>Rejoignez notre communauté</h2>
+        <p>Que vous soyez près ou loin, vous êtes les bienvenus parmi nous.</p>
+        <div class="hero-ctas">
+          <button class="btn-primary" onclick="showSection('live',null)"><i class="fa-solid fa-circle-play"></i> Participer au Culte</button>
+          <button class="btn-secondary" onclick="showSection('priere',null)"><i class="fa-solid fa-hands-praying"></i> Espace de Prière</button>
+        </div>
       </div>
     </div>
   </div>
+</section>
 
-  <!-- CTA rejoindre -->
-  <div class="eglise-cta-section">
-    <div class="eglise-cta-inner">
-      <h2>Rejoignez notre communauté</h2>
-      <p>Que vous soyez près ou loin, vous êtes les bienvenus parmi nous.</p>
-      <div class="hero-ctas">
-        <button class="btn-primary" onclick="showSection('live', document.querySelector('[href=\'#live\']'))">
-          <i class="fa-solid fa-circle-play"></i> Participer au Culte
-        </button>
-        <button class="btn-secondary" onclick="showSection('priere', document.querySelector('[href=\'#priere\']'))">
-          <i class="fa-solid fa-hands-praying"></i> Espace de Prière
-        </button>
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION — NOTRE HISTOIRE
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-histoire" class="section">
+  <div class="sous-section-hero" style="--accent:#3498db">
+    <div class="sous-section-hero-inner">
+      <i class="fa-solid fa-book-open sous-section-icon"></i>
+      <h1>Notre Histoire</h1>
+      <p>Les fondements de l'Église FOI SAINTE</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="eglise-histoire-inner" style="margin-top:2.5rem">
+      <div class="eglise-histoire-text">
+        <p class="evb-label"><i class="fa-solid fa-book-open"></i> Notre Histoire</p>
+        <p id="eglise-histoire-display">L'Église FOI SAINTE a été fondée avec la conviction profonde que Dieu appelle son peuple à se bâtir sur une foi solide et inébranlable. Depuis notre création, nous avons grandi en nombre et en maturité spirituelle, portés par la grâce de Dieu et la fidélité de notre communauté.</p>
+      </div>
+      <div class="eglise-histoire-img">
+        <img src="logo-foi-sainte.jpg" alt="Église FOI SAINTE" />
+      </div>
+    </div>
+    <div class="eglise-verset-banner" style="margin-top:3rem">
+      <div class="evb-inner">
+        <p class="evb-label"><i class="fa-solid fa-book-bible"></i> Verset fondateur</p>
+        <blockquote class="evb-texte">« Mais vous, bien-aimés, vous édifiant vous-mêmes sur votre très sainte foi… »</blockquote>
+        <cite class="evb-ref">— Jude 1 : 20-21 —</cite>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION — ÉQUIPE PASTORALE
+═══════════════════════════════════════════════════════════════ -->
+<section id="section-equipe" class="section">
+  <div class="sous-section-hero" style="--accent:#e67e22">
+    <div class="sous-section-hero-inner">
+      <i class="fa-solid fa-users sous-section-icon"></i>
+      <h1>Équipe Pastorale</h1>
+      <p>Ceux que Dieu a placés pour vous servir</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="eglise-equipe-grid" id="eglise-equipe-grid" style="margin-top:2.5rem"></div>
+    <div class="eglise-cta-section" style="margin-top:2rem">
+      <div class="eglise-cta-inner">
+        <h2>Nous contacter</h2>
+        <p id="eglise-contact-display2">+225 07 89 36 21 85</p>
+        <div class="hero-ctas">
+          <button class="btn-primary" onclick="showSection('priere',null)"><i class="fa-solid fa-hands-praying"></i> Envoyer une demande de prière</button>
+        </div>
       </div>
     </div>
   </div>
