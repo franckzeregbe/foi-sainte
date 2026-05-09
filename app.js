@@ -133,6 +133,7 @@ const APP_STATE = {
   },
   replays: [],
   intentions: [],
+  temoignages: [],
   agenda: [],
   eglise: {},
   adminPrayers: [],
@@ -239,8 +240,7 @@ function toggleNavDropdown(e, menuId) {
 }
 
 function closeNavDropdown() {
-  const menu = document.getElementById('nav-dropdown-cultes');
-  if (menu) menu.classList.remove('open');
+  document.querySelectorAll('.nav-dropdown-menu').forEach(m => m.classList.remove('open'));
   document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('active'));
 }
 
@@ -248,7 +248,7 @@ document.addEventListener('click', closeNavDropdown);
 
 function handleHashNav() {
   const hash = location.hash.replace('#', '');
-  const validIds = ['accueil', 'presentation', 'vision', 'histoire', 'equipe', 'live', 'replays', 'priere', 'don', 'admin'];
+  const validIds = ['accueil', 'presentation', 'vision', 'histoire', 'equipe', 'live', 'replays', 'priere', 'temoignage', 'don', 'admin'];
   if (hash && validIds.includes(hash)) {
     const link = document.querySelector(`[href="#${hash}"]`);
     showSection(hash, link);
@@ -329,6 +329,7 @@ function applyPublicContentToUI() {
 
   renderDonationMethods();
   renderIntentions();
+  renderTemoignages();
   renderReplays();
   renderAgenda(APP_STATE.agenda);
   renderEglise(APP_STATE.eglise);
@@ -676,6 +677,44 @@ function renderIntentions() {
   `).join('');
 }
 
+async function submitTemoignage(e) {
+  e.preventDefault();
+  const prenom = document.getElementById('temo-prenom').value.trim();
+  const titre = document.getElementById('temo-titre').value.trim();
+  const texte = document.getElementById('temo-texte').value.trim();
+  if (!prenom || !titre || !texte) return;
+  try {
+    await api('/api/public/temoignages', {
+      method: 'POST',
+      body: JSON.stringify({ name: prenom, titre, texte }),
+    });
+    await loadPublicContent();
+    document.getElementById('temoignage-form').style.display = 'none';
+    document.getElementById('temoignage-success').style.display = 'flex';
+    showToast('Gloire à Dieu ! Témoignage reçu.');
+    setTimeout(() => {
+      document.getElementById('temoignage-form').style.display = 'block';
+      document.getElementById('temoignage-success').style.display = 'none';
+      document.getElementById('temoignage-form').reset();
+      document.getElementById('temo-char-count').textContent = '0 / 1000';
+    }, 5000);
+  } catch {
+    showToast('Impossible d\'envoyer le témoignage pour le moment.');
+  }
+}
+
+function renderTemoignages() {
+  const list = document.getElementById('temoignages-list');
+  if (!list) return;
+  list.innerHTML = (APP_STATE.temoignages || []).map((t) => `
+    <div class="intention-card temoignage-card">
+      <div class="intention-name"><i class="fa-solid fa-star" style="color:#f39c12"></i> ${escapeHtml(t.name)} :</div>
+      <div class="temoignage-titre">${escapeHtml(t.titre)}</div>
+      <div class="intention-text">${escapeHtml(t.texte)}</div>
+    </div>
+  `).join('') || '<p style="color:rgba(255,255,255,.5);text-align:center;padding:1rem">Soyez le premier à partager !</p>';
+}
+
 async function submitPriere(e) {
   e.preventDefault();
 
@@ -712,11 +751,18 @@ async function submitPriere(e) {
 function initCharCount() {
   const textarea = document.getElementById('demande');
   const counter = document.getElementById('char-count');
-  if (!textarea || !counter) return;
-
-  textarea.addEventListener('input', () => {
-    counter.textContent = `${textarea.value.length} / 500`;
-  });
+  if (textarea && counter) {
+    textarea.addEventListener('input', () => {
+      counter.textContent = `${textarea.value.length} / 500`;
+    });
+  }
+  const temoTextarea = document.getElementById('temo-texte');
+  const temoCounter = document.getElementById('temo-char-count');
+  if (temoTextarea && temoCounter) {
+    temoTextarea.addEventListener('input', () => {
+      temoCounter.textContent = `${temoTextarea.value.length} / 1000`;
+    });
+  }
 }
 
 function selectAmount(btn, amount, targetInputId) {
@@ -858,6 +904,7 @@ async function loadPublicContent() {
     APP_STATE.donations = data.donations || APP_STATE.donations;
     APP_STATE.replays = Array.isArray(data.replays) ? data.replays : [];
     APP_STATE.intentions = Array.isArray(data.intentions) ? data.intentions : [];
+    APP_STATE.temoignages = Array.isArray(data.temoignages) ? data.temoignages : [];
     APP_STATE.agenda = Array.isArray(data.agenda) ? data.agenda : [];
     APP_STATE.eglise = data.eglise || APP_STATE.eglise;
     applyPublicContentToUI();
