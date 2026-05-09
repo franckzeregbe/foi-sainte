@@ -350,7 +350,6 @@ function renderDonationMethods() {
 
   if (mmNetworks.length > 0) {
     const first = mmNetworks[0];
-    const networksJson = escapeHtml(JSON.stringify(mmNetworks));
     const tabs = mmNetworks.map((n, i) => `
       <button class="mm-tab${i === 0 ? ' mm-tab--active' : ''}"
         data-type="${n.type}" data-label="${n.label}"
@@ -706,13 +705,18 @@ async function submitTemoignage(e) {
 function renderTemoignages() {
   const list = document.getElementById('temoignages-list');
   if (!list) return;
-  list.innerHTML = (APP_STATE.temoignages || []).map((t) => `
+  const items = APP_STATE.temoignages || [];
+  if (!items.length) {
+    list.innerHTML = '<p style="color:rgba(255,255,255,.5);text-align:center;padding:1rem">Soyez le premier à partager !</p>';
+    return;
+  }
+  list.innerHTML = items.map((t) => `
     <div class="intention-card temoignage-card">
       <div class="intention-name"><i class="fa-solid fa-star" style="color:#f39c12"></i> ${escapeHtml(t.name)} :</div>
       <div class="temoignage-titre">${escapeHtml(t.titre)}</div>
       <div class="intention-text">${escapeHtml(t.texte)}</div>
     </div>
-  `).join('') || '<p style="color:rgba(255,255,255,.5);text-align:center;padding:1rem">Soyez le premier à partager !</p>';
+  `).join('');
 }
 
 async function submitPriere(e) {
