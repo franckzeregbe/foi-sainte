@@ -743,7 +743,7 @@ function toCSV(headers, rows) {
 }
 
 app.get('/api/admin/export/prayers', requireAdmin, (req, res) => {
-  const rows = db.prepare('SELECT id, name, prayer_text AS demande, created_at AS date FROM prayers ORDER BY created_at DESC').all();
+  const rows = db.prepare('SELECT id, name, text AS demande, created_at AS date FROM prayers ORDER BY created_at DESC').all();
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="demandes-de-priere.csv"');
   res.send('\uFEFF' + toCSV(['id', 'name', 'demande', 'date'], rows));
@@ -751,18 +751,18 @@ app.get('/api/admin/export/prayers', requireAdmin, (req, res) => {
 
 app.get('/api/admin/export/stats', requireAdmin, (req, res) => {
   const totals = db.prepare('SELECT key, value FROM stat_totals').all();
-  const daily = db.prepare('SELECT visit_date AS date, visitors FROM stat_daily_visitors ORDER BY visit_date DESC').all();
+  const daily = db.prepare('SELECT day AS date, COUNT(*) AS visiteurs FROM stat_daily_visitors GROUP BY day ORDER BY day DESC').all();
   let csv = '"Indicateur","Valeur"\n';
   totals.forEach(t => { csv += `"${t.key}","${t.value}"\n`; });
   csv += '\n"Date","Visiteurs uniques"\n';
-  daily.forEach(d => { csv += `"${d.date}","${d.visitors}"\n`; });
+  daily.forEach(d => { csv += `"${d.date}","${d.visiteurs}"\n`; });
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="statistiques.csv"');
   res.send('\uFEFF' + csv);
 });
 
 app.get('/api/admin/export/replays', requireAdmin, (req, res) => {
-  const rows = db.prepare('SELECT id, title AS titre, youtube_id AS youtube, created_at AS date FROM replays ORDER BY created_at DESC').all();
+  const rows = db.prepare('SELECT id, title AS titre, yt_id AS youtube, created_at AS date FROM replays ORDER BY created_at DESC').all();
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');
   res.setHeader('Content-Disposition', 'attachment; filename="replays.csv"');
   res.send('\uFEFF' + toCSV(['id', 'titre', 'youtube', 'date'], rows));
