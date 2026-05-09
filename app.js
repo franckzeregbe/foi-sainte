@@ -226,9 +226,9 @@ function toggleMenu() {
   document.getElementById('nav').classList.toggle('open');
 }
 
-function toggleNavDropdown(e) {
+function toggleNavDropdown(e, menuId) {
   e.stopPropagation();
-  const menu = document.getElementById('nav-dropdown-cultes');
+  const menu = document.getElementById(menuId);
   const btn = e.currentTarget;
   const isOpen = menu.classList.contains('open');
   closeNavDropdown();
@@ -248,7 +248,7 @@ document.addEventListener('click', closeNavDropdown);
 
 function handleHashNav() {
   const hash = location.hash.replace('#', '');
-  const validIds = ['accueil', 'eglise', 'live', 'replays', 'priere', 'don', 'admin'];
+  const validIds = ['accueil', 'presentation', 'vision', 'histoire', 'equipe', 'live', 'replays', 'priere', 'don', 'admin'];
   if (hash && validIds.includes(hash)) {
     const link = document.querySelector(`[href="#${hash}"]`);
     showSection(hash, link);
@@ -1581,7 +1581,7 @@ async function removeAgenda(id) {
 }
 
 function renderEglise(e) {
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || el.textContent; };
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.textContent = val; };
   set('eglise-nom-display', e.nom);
   set('eglise-slogan-display', e.slogan);
   set('eglise-vision-display', e.vision);
@@ -1593,6 +1593,7 @@ function renderEglise(e) {
   set('eglise-horaire-veillee-display', e.horaireVeillee);
   set('eglise-adresse-display', e.adresse);
   set('eglise-contact-display', e.contact);
+  set('eglise-contact-display2', e.contact);
   set('eglise-email-display', e.email);
 
   const grid = document.getElementById('eglise-equipe-grid');
