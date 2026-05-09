@@ -1176,8 +1176,6 @@ function fillAdminForms() {
 
   if (verseText) verseText.value = APP_STATE.verse ? APP_STATE.verse.texte : '';
   if (verseRef) verseRef.value = APP_STATE.verse ? APP_STATE.verse.ref : '';
-  const msgType = document.getElementById('admin-message-type');
-  if (msgType) msgType.value = APP_STATE.verse?.type || getDailyMessage().type || 'inspiration';
   if (streamUrl) streamUrl.value = APP_STATE.live.streamUrl || '';
   if (liveVerse) liveVerse.value = APP_STATE.live.liveVerseText || '';
   if (liveVideoId) liveVideoId.value = APP_STATE.live.liveVideoId || '';
