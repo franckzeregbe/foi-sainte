@@ -584,10 +584,9 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
 app.put('/api/admin/verse', requireAdmin, (req, res) => {
   const texte = String(req.body?.texte || '').trim();
   const ref = String(req.body?.ref || '').trim();
-  if (!texte || !ref) {
-    return res.status(400).json({ error: 'INVALID_PAYLOAD' });
-  }
-  setSettingJson('verse', { texte, ref });
+  const type = String(req.body?.type || 'inspiration').trim();
+  if (!texte || !ref) return res.status(400).json({ error: 'INVALID_PAYLOAD' });
+  setSettingJson('verse', { texte, ref, type });
   res.json({ ok: true });
 });
 
