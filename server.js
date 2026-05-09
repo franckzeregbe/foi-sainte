@@ -129,6 +129,14 @@ function initDb() {
       heure TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS temoignages (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      titre TEXT NOT NULL,
+      texte TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
 
   ensureSetting('verse', JSON.stringify(DEFAULT_VERSE));
@@ -263,6 +271,10 @@ function normalizeDonations(raw) {
 
 function getDonationsConfig() {
   return normalizeDonations(getSettingJson('donations', DEFAULT_DONATIONS));
+}
+
+function getTemoignages() {
+  return db.prepare('SELECT id, name, titre, texte FROM temoignages ORDER BY id DESC').all();
 }
 
 function getAgenda() {
@@ -444,6 +456,7 @@ app.get('/api/public/content', (req, res) => {
     donations: getDonationsConfig(),
     replays: getReplays(),
     intentions: getSharedPrayers(),
+    temoignages: getTemoignages(),
     agenda: getAgenda(),
     eglise: getSettingJson('eglise', {}),
   });
@@ -575,6 +588,7 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
     donations: getDonationsConfig(),
     replays: getReplays(),
     prayers: getAllPrayers(),
+    temoignages: getTemoignages(),
     agenda: getAgenda(),
     eglise: getSettingJson('eglise', {}),
     stats: buildStats(todayKey()),
@@ -685,6 +699,23 @@ app.put('/api/admin/eglise', requireAdmin, (req, res) => {
   for (const f of fields) payload[f] = String(req.body?.[f] || '').trim().slice(0, 1000);
   setSettingJson('eglise', payload);
   res.json({ ok: true, eglise: payload });
+});
+
+app.post('/api/public/temoignages', (req, res) => {
+  const name = String(req.body?.name || '').trim();
+  const titre = String(req.body?.titre || '').trim();
+  const texte = String(req.body?.texte || '').trim();
+  if (!name || !titre || !texte) return res.status(400).json({ error: 'INVALID_PAYLOAD' });
+  db.prepare('INSERT INTO temoignages (name, titre, texte, created_at) VALUES (?, ?, ?, ?)')
+    .run(name.slice(0, 80), titre.slice(0, 200), texte.slice(0, 2000), new Date().toISOString());
+  res.json({ ok: true });
+});
+
+app.delete('/api/admin/temoignages/:id', requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'INVALID_ID' });
+  db.prepare('DELETE FROM temoignages WHERE id = ?').run(id);
+  res.json({ ok: true });
 });
 
 app.delete('/api/admin/prayers/:id', requireAdmin, (req, res) => {

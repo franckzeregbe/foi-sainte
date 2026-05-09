@@ -2932,3 +2932,12 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── TÉMOIGNAGES ─────────────────────────────────────────────────────────── */
+.temoignage-card { border-left: 3px solid #f39c12; }
+.temoignage-titre {
+  font-weight: 600;
+  color: #f39c12;
+  font-size: .95rem;
+  margin: .25rem 0 .4rem;
+}
