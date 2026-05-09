@@ -226,6 +226,26 @@ function toggleMenu() {
   document.getElementById('nav').classList.toggle('open');
 }
 
+function toggleNavDropdown(e) {
+  e.stopPropagation();
+  const menu = document.getElementById('nav-dropdown-cultes');
+  const btn = e.currentTarget;
+  const isOpen = menu.classList.contains('open');
+  closeNavDropdown();
+  if (!isOpen) {
+    menu.classList.add('open');
+    btn.classList.add('active');
+  }
+}
+
+function closeNavDropdown() {
+  const menu = document.getElementById('nav-dropdown-cultes');
+  if (menu) menu.classList.remove('open');
+  document.querySelectorAll('.nav-dropdown-btn').forEach(b => b.classList.remove('active'));
+}
+
+document.addEventListener('click', closeNavDropdown);
+
 function handleHashNav() {
   const hash = location.hash.replace('#', '');
   const validIds = ['accueil', 'eglise', 'live', 'replays', 'priere', 'don', 'admin'];
