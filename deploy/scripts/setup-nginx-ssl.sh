@@ -18,7 +18,7 @@ if [ ! -f "${CONF_SRC}" ]; then
 fi
 
 sudo cp "${CONF_SRC}" "${CONF_DST}"
-sudo sed -i "s/foi-sainte.org www.foi-sainte.org/${DOMAIN} www.${DOMAIN}/g" "${CONF_DST}"
+sudo sed -i "s/VOTRE-DOMAINE.COM/${DOMAIN}/g" "${CONF_DST}"
 
 sudo ln -sf "${CONF_DST}" /etc/nginx/sites-enabled/foi-sainte
 sudo rm -f /etc/nginx/sites-enabled/default

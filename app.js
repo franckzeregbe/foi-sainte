@@ -6,6 +6,172 @@ let socket = null;
 let pushSubscription = null;
 const PUSH_STORAGE_KEY = 'foisainte_push_subscribed';
 
+// ─── UI ENHANCEMENTS ─────────────────────────────────────────
+
+// Floating background particles
+function createBgParticles() {
+  const container = document.getElementById('bg-particles');
+  if (!container) return;
+  const colors = ['var(--nav-bg)', 'var(--gold)', 'var(--orange)', 'var(--purple)'];
+  const count = window.innerWidth < 768 ? 10 : 18;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'bg-particle';
+    const size = Math.random() * 6 + 3;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.animationDuration = (Math.random() * 20 + 15) + 's';
+    p.style.animationDelay = (Math.random() * 15) + 's';
+    container.appendChild(p);
+  }
+}
+
+// Page loader
+function hidePageLoader() {
+  const loader = document.getElementById('page-loader');
+  if (loader) {
+    setTimeout(() => loader.classList.add('hidden'), 300);
+    setTimeout(() => { if (loader.parentElement) loader.remove(); }, 1000);
+  }
+}
+
+// Hero particles
+function createHeroParticles() {
+  const container = document.getElementById('hero-particles');
+  if (!container) return;
+
+  const count = window.innerWidth < 768 ? 12 : 25;
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.bottom = -(Math.random() * 100) + 'px';
+    p.style.width = (Math.random() * 3 + 1.5) + 'px';
+    p.style.height = p.style.width;
+    p.style.animationDuration = (Math.random() * 12 + 8) + 's';
+    p.style.animationDelay = (Math.random() * 10) + 's';
+    p.style.opacity = '0';
+    container.appendChild(p);
+  }
+}
+
+// Scroll animations with IntersectionObserver
+function initScrollAnimations() {
+  // Auto-wrap grid/section children in fade-up elements
+  const animTargets = [
+    '.agenda-grid', '.replay-grid', '.priere-grid', '.don-grid',
+    '.eglise-infos-grid', '.eglise-vm-grid', '.eglise-equipe-grid',
+    '.eglise-nav-cards', '.intentions-list', '.confessions-grid',
+  ];
+
+  animTargets.forEach(selector => {
+    const grid = document.querySelector(selector);
+    if (!grid || grid.dataset.animated) return;
+    grid.dataset.animated = '1';
+    grid.classList.add('stagger');
+    Array.from(grid.children).forEach(child => {
+      if (!child.classList.contains('fade-up')) {
+        child.classList.add('fade-up');
+      }
+    });
+  });
+
+  // Animate other key sections
+  document.querySelectorAll('.section-block, .eglise-verset-banner, .don-scripture, .broadcast-help-card').forEach(el => {
+    if (!el.classList.contains('fade-up')) el.classList.add('fade-up');
+  });
+
+  // Observe
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, {
+    threshold: 0.1,
+    rootMargin: '0px 0px -40px 0px',
+  });
+
+  document.querySelectorAll('.fade-up, .fade-left, .fade-right, .scale-in').forEach(el => {
+    observer.observe(el);
+  });
+}
+
+// Scroll-to-top button
+function initScrollTopBtn() {
+  const btn = document.getElementById('scroll-top-btn');
+  if (!btn) return;
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        if (window.scrollY > 400) {
+          btn.classList.add('visible');
+        } else {
+          btn.classList.remove('visible');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+}
+
+// Header scroll effect
+function initHeaderScroll() {
+  const header = document.getElementById('header');
+  if (!header) return;
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (!ticking) {
+      requestAnimationFrame(() => {
+        if (window.scrollY > 20) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  });
+}
+
+// Section transition: fade in/out
+function showSection(id, linkEl) {
+  document.querySelectorAll('.section').forEach((s) => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach((l) => l.classList.remove('active'));
+
+  const el = document.getElementById('section-' + id);
+  if (el) {
+    // Quick fade-in for section transitions
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(10px)';
+    el.style.transition = 'opacity 0.35s ease, transform 0.35s ease';
+    el.classList.add('active');
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        el.style.opacity = '1';
+        el.style.transform = 'translateY(0)';
+      });
+    });
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  if (linkEl) linkEl.classList.add('active');
+  document.getElementById('nav').classList.remove('open');
+  closeDrawer();
+  history.replaceState(null, '', '#' + id);
+}
+
 const MESSAGES_DU_JOUR = [
   // INSPIRATION
   { type:'inspiration', texte:"Jésus a dit : Je suis la lumière du monde. Celui qui me suit ne marchera pas dans les ténèbres, mais il aura la lumière de la vie.", ref:'Jean 8:12' },
@@ -135,6 +301,7 @@ const APP_STATE = {
   intentions: [],
   temoignages: [],
   agenda: [],
+  audio: [],
   eglise: {},
   adminPrayers: [],
   editingReplayId: null,
@@ -157,6 +324,11 @@ const VISITOR_STORAGE_KEY = 'foisainte_visitor_id';
 const CHAT_NAME_KEY = 'foisainte_chat_name';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  // UI Enhancements
+  createBgParticles();
+  initScrollTopBtn();
+  initHeaderScroll();
+
   initAgenda();
   initHomeClock();
   initCharCount();
@@ -171,6 +343,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyPublicContentToUI();
   updateStatsUi();
   checkLiveStatus();
+
+  // Poll live côté frontend : pour que le site s'actualise quand tu démarres/arrêtes le live
+  // (le serveur met à jour settings.live, mais le navigateur ne reload pas tout seul)
+  startLiveAutoRefresh();
+
+  // Scroll animations (after DOM is populated)
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      initScrollAnimations();
+      hidePageLoader();
+    });
+  });
 
   // Proposer les notifications après 5 secondes
   setTimeout(() => {
@@ -208,23 +392,31 @@ async function api(path, options = {}) {
   return data;
 }
 
-function showSection(id, linkEl) {
-  document.querySelectorAll('.section').forEach((s) => s.classList.remove('active'));
-  document.querySelectorAll('.nav-link').forEach((l) => l.classList.remove('active'));
-
-  const el = document.getElementById('section-' + id);
-  if (el) {
-    el.classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  if (linkEl) linkEl.classList.add('active');
-  document.getElementById('nav').classList.remove('open');
-  history.replaceState(null, '', '#' + id);
-}
-
 function toggleMenu() {
   document.getElementById('nav').classList.toggle('open');
+}
+
+// ─── Drawer Navigation ─────────────────────────
+function toggleDrawer() {
+  const drawer = document.getElementById('nav-drawer');
+  const overlay = document.getElementById('nav-drawer-overlay');
+  if (!drawer || !overlay) return;
+  const isOpen = drawer.classList.contains('open');
+  if (isOpen) {
+    closeDrawer();
+  } else {
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeDrawer() {
+  const drawer = document.getElementById('nav-drawer');
+  const overlay = document.getElementById('nav-drawer-overlay');
+  if (drawer) drawer.classList.remove('open');
+  if (overlay) overlay.classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 function toggleNavDropdown(e, menuId) {
@@ -248,7 +440,7 @@ document.addEventListener('click', closeNavDropdown);
 
 function handleHashNav() {
   const hash = location.hash.replace('#', '');
-  const validIds = ['accueil', 'presentation', 'vision', 'histoire', 'equipe', 'live', 'replays', 'priere', 'temoignage', 'don', 'admin'];
+  const validIds = ['accueil', 'presentation', 'vision', 'confessions', 'histoire', 'equipe', 'live', 'replays', 'audio', 'priere', 'temoignage', 'don', 'admin'];
   if (hash && validIds.includes(hash)) {
     const link = document.querySelector(`[href="#${hash}"]`);
     showSection(hash, link);
@@ -256,23 +448,14 @@ function handleHashNav() {
 }
 
 function initHomeClock() {
-  const timeEl = document.getElementById('hero-clock-time');
-  const dateEl = document.getElementById('hero-clock-date');
-  if (!timeEl || !dateEl) return;
+  const clockEl = document.getElementById('hero-clock');
+  if (!clockEl) return;
 
   const updateClock = () => {
     const now = new Date();
-    timeEl.textContent = now.toLocaleTimeString('fr-FR', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-    dateEl.textContent = now.toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    });
+    const hours = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    clockEl.textContent = hours + ':' + mins;
   };
 
   updateClock();
@@ -280,9 +463,7 @@ function initHomeClock() {
 }
 
 function initAgenda() {
-  const grid = document.getElementById('agenda-grid');
-  if (!grid) return;
-  renderAgenda(APP_STATE.agenda);
+  renderProgrammeWeekly(APP_STATE.agenda);
 }
 
 function renderAgenda(items) {
@@ -305,6 +486,84 @@ function renderAgenda(items) {
       <div class="agenda-heure"><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.heure)}</div>
     </div>
   `).join('');
+
+  // Render weekly program on homepage
+  renderProgrammeWeekly(items);
+}
+
+function renderProgrammeWeekly(items) {
+  const list = document.getElementById('programme-weekly-list');
+  if (!list) return;
+
+  const joursOrdre = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+  if (!items.length) {
+    const defaultProgramme = [
+      { date_text: 'Dimanche', type: 'Culte', titre: 'Culte Dominical', heure: '10h00' },
+      { date_text: 'Mercredi', type: 'Étude Biblique', titre: 'Étude de la Parole', heure: '19h00' },
+      { date_text: 'Vendredi', type: 'Prière', titre: 'Soirée de Prière', heure: '19h30' },
+      { date_text: 'Samedi', type: 'Louange', titre: 'Répétition Louange', heure: '16h00' },
+    ];
+    items = defaultProgramme;
+  }
+
+  // Trier par jour de la semaine
+  const sorted = [...items].sort((a, b) => {
+    const dayA = joursOrdre.findIndex(j => a.date_text.includes(j));
+    const dayB = joursOrdre.findIndex(j => b.date_text.includes(j));
+    return (dayA === -1 ? 99 : dayA) - (dayB === -1 ? 99 : dayB);
+  });
+
+  const today = new Date().getDay(); // 0=Dimanche
+  const todayName = joursOrdre[today];
+
+  list.innerHTML = sorted.map((ev) => {
+    const jourNom = joursOrdre.find(j => ev.date_text.includes(j)) || ev.date_text;
+    const isToday = ev.date_text.includes(todayName);
+    const onclickAttr = getProgrammeOnClick(ev);
+    return `
+    <div class="programme-item${isToday ? ' highlight' : ''}" ${onclickAttr}>
+      <div class="programme-jour">${escapeHtml(jourNom)}</div>
+      <div class="programme-type">
+        <strong>${escapeHtml(ev.titre)}</strong>
+        <span>${escapeHtml(ev.type)}</span>
+      </div>
+      <div class="programme-heure"><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.heure)}</div>
+    </div>`;
+  }).join('');
+}
+
+function getProgrammeOnClick(ev) {
+  const t = (ev.type || '').toLowerCase();
+  if (t.includes('culte')) {
+    return `onclick="showSection('live',null)"`;
+  }
+  if (t.includes('prière') || t.includes('priere')) {
+    return `onclick="showSection('priere',null)"`;
+  }
+  if (t.includes('étude') || t.includes('etude') || t.includes('biblique')) {
+    const h = escapeHtml(ev.heure || '');
+    const ti = escapeHtml(ev.titre || '');
+    return `onclick="openModal('<div class=\\"modal-icon etude\\"><i class=\\"fa-solid fa-book-bible\\"></i></div><h3>${ti}</h3><div class=\\"modal-type\\">Étude Biblique</div><div class=\\"modal-detail\\"><i class=\\"fa-regular fa-clock\\"></i> ${h}</div><div class=\\"modal-detail\\"><i class=\\"fa-solid fa-users\\"></i> Ouvert à tous</div>')"`;
+  }
+  // Louange / autres → modal générique
+  const h = escapeHtml(ev.heure || '');
+  const ti = escapeHtml(ev.titre || '');
+  const ty = escapeHtml(ev.type || '');
+  return `onclick="openModal('<div class=\\"modal-icon louange\\"><i class=\\"fa-solid fa-music\\"></i></div><h3>${ti}</h3><div class=\\"modal-type\\">${ty}</div><div class=\\"modal-detail\\"><i class=\\"fa-regular fa-clock\\"></i> ${h}</div>')"`;
+}
+
+function withYouTubeOriginParam(url) {
+  if (!url) return url;
+
+  const origin = window.location.origin;
+  if (!origin) return url;
+
+  // Déjà présent ?
+  if (/[?&]origin=/.test(url)) return url;
+
+  const sep = url.includes('?') ? '&' : '?';
+  return `${url}${sep}origin=${encodeURIComponent(origin)}`;
 }
 
 function applyPublicContentToUI() {
@@ -314,24 +573,37 @@ function applyPublicContentToUI() {
   const cfg = TYPE_CONFIG[type] || TYPE_CONFIG.inspiration;
 
   const label = document.getElementById('message-type-label');
-  const verseText = document.getElementById('verset-texte');
-  const verseRef = document.getElementById('verset-ref');
+  const verseText = document.getElementById('verset-texte-hero');
+  const verseRef = document.getElementById('verset-ref-hero');
   const liveVerse = document.getElementById('live-verset-display');
   const frame = document.getElementById('yt-live-frame');
+  const liveDebugSrc = document.getElementById('live-debug-src');
 
-  if (label) {
-    label.innerHTML = `<i class="fa-solid ${cfg.icon}" style="color:${cfg.color}"></i> MESSAGE DU JOUR`;
-  }
   if (verseText) verseText.textContent = verse.texte;
   if (verseRef) verseRef.textContent = `- ${verse.ref} -`;
   if (liveVerse) liveVerse.textContent = APP_STATE.live.liveVerseText || `"${verse.texte}" - ${verse.ref}`;
-  if (frame && APP_STATE.live.streamUrl) frame.src = APP_STATE.live.streamUrl;
+
+  // Dashboard: message du jour — maintenant dans le hero
+  // (les éléments verset-texte et verset-ref sont utilisés directement)
+
+  // Dashboard: KPI cultes
+  const kpiCultes = document.getElementById('kpi-cultes');
+  if (kpiCultes && APP_STATE.agenda) {
+    const culteCount = APP_STATE.agenda.filter(e =>
+      e.type && e.type.toLowerCase().includes('culte')
+    ).length;
+    kpiCultes.textContent = culteCount || '0';
+  }
+
+  if (liveDebugSrc) liveDebugSrc.textContent = String(APP_STATE.live?.streamUrl || '');
+  if (frame && APP_STATE.live.streamUrl) frame.src = withYouTubeOriginParam(APP_STATE.live.streamUrl);
 
   renderDonationMethods();
   renderIntentions();
   renderTemoignages();
   renderReplays();
-  renderAgenda(APP_STATE.agenda);
+  renderAudio();
+  renderProgrammeWeekly(APP_STATE.agenda);
   renderEglise(APP_STATE.eglise);
 }
 
@@ -519,11 +791,43 @@ function renderDonationMethods() {
   }
 }
 
+let currentYearFilter = 'all';
+
 function renderReplays() {
   const grid = document.getElementById('replay-grid');
   if (!grid) return;
 
-  grid.innerHTML = APP_STATE.replays.map((r) => `
+  // Extraire les années uniques des replays
+  const years = new Set();
+  APP_STATE.replays.forEach(r => {
+    const yearMatch = r.date.match(/\d{4}/);
+    if (yearMatch) years.add(yearMatch[0]);
+  });
+
+  // Trier les années (plus récente en premier)
+  const sortedYears = [...years].sort((a, b) => b - a);
+
+  // Mettre à jour les boutons de filtre
+  const filterContainer = document.getElementById('year-filter');
+  if (filterContainer) {
+    filterContainer.innerHTML = `<button class="year-btn ${currentYearFilter === 'all' ? 'active' : ''}" onclick="filterReplaysByYear('all', this)">Toutes</button>`;
+    sortedYears.forEach(year => {
+      filterContainer.innerHTML += `<button class="year-btn ${currentYearFilter === year ? 'active' : ''}" onclick="filterReplaysByYear('${year}', this)">${year}</button>`;
+    });
+  }
+
+  // Filtrer les replays par année
+  let filteredReplays = APP_STATE.replays;
+  if (currentYearFilter !== 'all') {
+    filteredReplays = APP_STATE.replays.filter(r => r.date.includes(currentYearFilter));
+  }
+
+  if (filteredReplays.length === 0) {
+    grid.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:2rem;grid-column:1/-1">Aucun culte disponible pour cette période.</p>';
+    return;
+  }
+
+  grid.innerHTML = filteredReplays.map((r) => `
     <a class="replay-card" href="https://youtube.com/watch?v=${encodeURIComponent(r.id)}" target="_blank">
       <div class="replay-thumb">
         <img src="https://img.youtube.com/vi/${encodeURIComponent(r.id)}/hqdefault.jpg" alt="${escapeHtml(r.titre)}" loading="lazy" />
@@ -535,6 +839,14 @@ function renderReplays() {
       </div>
     </a>
   `).join('');
+}
+
+function filterReplaysByYear(year, btnEl) {
+  currentYearFilter = year;
+  // Mettre à jour l'état actif des boutons
+  document.querySelectorAll('.year-btn').forEach(b => b.classList.remove('active'));
+  if (btnEl) btnEl.classList.add('active');
+  renderReplays();
 }
 
 function initLiveChat() {
@@ -649,6 +961,7 @@ function checkLiveStatus() {
   const notif = document.getElementById('notif-bar');
   const notifText = document.getElementById('notif-text');
   const viewers = document.getElementById('viewers-count');
+  const liveSubtitle = document.getElementById('live-preview-subtitle');
 
   if (viewers) viewers.textContent = String(APP_STATE.stats.uniqueVisitorsToday || 0);
 
@@ -658,9 +971,23 @@ function checkLiveStatus() {
       notifText.textContent = 'Le culte est en cours EN DIRECT - Rejoignez-nous maintenant !';
       notif.style.display = 'flex';
     }
+    // KPI live status
+    const kpiLive = document.getElementById('kpi-live');
+    if (kpiLive) { kpiLive.textContent = 'En direct'; kpiLive.style.color = 'var(--green)'; }
+    // Live preview banner
+    if (liveSubtitle) {
+      liveSubtitle.textContent = APP_STATE.stats.uniqueVisitorsToday + ' en ligne — Cliquez pour rejoindre';
+    }
   } else {
     if (badge) badge.style.display = 'none';
     if (notif) notif.style.display = 'none';
+    // KPI live status
+    const kpiLive = document.getElementById('kpi-live');
+    if (kpiLive) { kpiLive.textContent = 'Non'; kpiLive.style.color = 'var(--text-secondary)'; }
+    // Live preview banner
+    if (liveSubtitle) {
+      liveSubtitle.textContent = 'Prochain culte — Cliquez pour voir les replays';
+    }
   }
 }
 
@@ -910,6 +1237,7 @@ async function loadPublicContent() {
     APP_STATE.intentions = Array.isArray(data.intentions) ? data.intentions : [];
     APP_STATE.temoignages = Array.isArray(data.temoignages) ? data.temoignages : [];
     APP_STATE.agenda = Array.isArray(data.agenda) ? data.agenda : [];
+    APP_STATE.audio = Array.isArray(data.audio) ? data.audio : [];
     APP_STATE.eglise = data.eglise || APP_STATE.eglise;
     applyPublicContentToUI();
     checkLiveStatus();
@@ -948,6 +1276,48 @@ async function refreshStats() {
   }
 }
 
+function startLiveAutoRefresh() {
+  const intervalMs = 25_000;
+
+  const refreshOnce = async () => {
+    try {
+      const data = await api('/api/public/content');
+      if (!data?.live) return;
+
+      const nextLive = data.live;
+      const frame = document.getElementById('yt-live-frame');
+
+      // Toujours mettre à jour APP_STATE
+      APP_STATE.live = nextLive;
+
+      // Mettre à jour l'iframe si l'URL a changé (en ajoutant origin si nécessaire)
+      if (frame && nextLive.streamUrl) {
+        const nextSrc = withYouTubeOriginParam(nextLive.streamUrl);
+        // Diagnostic mobile/PC : voir quelle URL on injecte réellement dans l'iframe
+        try {
+          console.log('[live:refresh]', {
+            nextLiveStreamUrl: nextLive.streamUrl,
+            nextSrc,
+            beforeFrameSrc: frame.src,
+          });
+        } catch {}
+        if (frame.src !== nextSrc) frame.src = nextSrc;
+      }
+
+      checkLiveStatus();
+    } catch {
+      // ignore
+    }
+  };
+
+  // Diagnostic / refresh immédiat
+  void refreshOnce();
+
+  setInterval(() => {
+    void refreshOnce();
+  }, intervalMs);
+}
+
 function updateStatsUi() {
   const visits = document.getElementById('stat-visits');
   const uniqueDay = document.getElementById('stat-unique-day');
@@ -958,6 +1328,12 @@ function updateStatsUi() {
   if (uniqueDay) uniqueDay.textContent = String(APP_STATE.stats.uniqueVisitorsToday || 0);
   if (chat) chat.textContent = String(APP_STATE.stats.chatMessages || 0);
   if (prayers) prayers.textContent = String(APP_STATE.stats.prayerRequests || 0);
+
+  // Dashboard KPI cards
+  const kpiVisiteurs = document.getElementById('kpi-visiteurs');
+  const kpiPrieres = document.getElementById('kpi-prieres');
+  if (kpiVisiteurs) kpiVisiteurs.textContent = String(APP_STATE.stats.uniqueVisitorsToday || 0);
+  if (kpiPrieres) kpiPrieres.textContent = String(APP_STATE.stats.prayerRequests || 0);
 }
 
 async function initAdmin() {
@@ -1192,6 +1568,7 @@ async function loadAdminDashboard() {
     APP_STATE.adminPrayers = Array.isArray(data.prayers) ? data.prayers : [];
     APP_STATE.temoignages = Array.isArray(data.temoignages) ? data.temoignages : [];
     APP_STATE.agenda = Array.isArray(data.agenda) ? data.agenda : APP_STATE.agenda;
+    APP_STATE.audio = Array.isArray(data.audio) ? data.audio : APP_STATE.audio;
     APP_STATE.eglise = data.eglise || APP_STATE.eglise;
     APP_STATE.stats = data.stats || APP_STATE.stats;
 
@@ -1200,6 +1577,7 @@ async function loadAdminDashboard() {
     renderAdminPrayers();
     renderAdminTemoignages();
     renderAdminAgenda();
+    renderAdminAudio();
     fillEgliseForms();
     updateStatsUi();
     applyPublicContentToUI();
@@ -1505,7 +1883,7 @@ function renderAdminReplays() {
     <div class="admin-list-item" style="${APP_STATE.editingReplayId === video.dbId ? 'background:rgba(200,169,81,.1);border:1px solid rgba(200,169,81,.3)' : ''}">
       <div>
         <strong>${escapeHtml(video.titre)}</strong>
-        <small>${escapeHtml(video.date)} - ID: ${escapeHtml(video.id)}</small>
+        <small>${escapeHtml(video.date)} — ${video.year || 'N/A'} — ID: ${escapeHtml(video.id)}</small>
       </div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap">
         <button class="btn-secondary" onclick="editReplay(${Number(video.dbId)}, '${video.id.replace(/'/g, "\\'")}', '${video.titre.replace(/'/g, "\\'")}', '${video.date.replace(/'/g, "\\'")}')" style="flex:1;min-width:80px">${APP_STATE.editingReplayId === video.dbId ? 'En édition ✎' : 'Éditer'}</button>
@@ -1639,7 +2017,19 @@ function renderEglise(e) {
   set('eglise-slogan-display', e.slogan);
   set('eglise-vision-display', e.vision);
   set('eglise-mission-display', e.mission);
-  set('eglise-valeurs-display', e.valeurs);
+  // Valeurs → badges
+  const valeursEl = document.getElementById('eglise-valeurs-display');
+  if (valeursEl && e.valeurs) {
+    const valeursList = valeursEl.closest('.valeurs-list');
+    if (valeursList) {
+      let valeurs = e.valeurs.split(/\d+\.\s*/).map(v => v.trim()).filter(Boolean);
+      valeurs = valeurs.map(v => {
+        const name = v.split(/\n/)[0].trim();
+        return name;
+      }).filter(v => v.length > 1 && v.length < 60);
+      valeursList.innerHTML = valeurs.map(v => `<span class="valeur-badge">${escapeHtml(v)}</span>`).join('');
+    }
+  }
   set('eglise-histoire-display', e.histoire);
   set('eglise-horaire-culte-display', e.horaireCulte);
   set('eglise-horaire-etude-display', e.horaireEtude);
@@ -1879,14 +2269,24 @@ function exportCSV(type) {
   window.open(url, '_blank');
 }
 
-function showToast(msg, duration = 3500) {
+function showToast(msg, duration = 3000) {
   const toast = document.getElementById('toast');
   if (!toast) return;
 
+  // Clear any pending hide
+  if (toast._hideTimer) clearTimeout(toast._hideTimer);
+  if (toast._pending) toast._pending.remove();
+
   toast.textContent = msg;
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), duration);
+
+  toast._hideTimer = setTimeout(() => {
+    toast.classList.remove('show');
+  }, duration);
 }
+
+// ─── Touch feedback on mobile ──────────────────
+document.addEventListener('touchstart', function() {}, { passive: true });
 
 // ─── SERVICE WORKER & WEB PUSH ────────────────────────────────────────────────
 
@@ -1998,6 +2398,178 @@ async function sendManualPush() {
     showToast(`✅ Notification envoyée à ${data.sent} abonné(s).`);
   } catch {
     showToast('Impossible d\'envoyer la notification.');
+  }
+}
+
+// ─── AUDIO SERMONS ────────────────────────────────────────────────────────────
+
+function renderAudio() {
+  const grid = document.getElementById('audio-list');
+  if (!grid) return;
+
+  if (!APP_STATE.audio.length) {
+    grid.innerHTML = '<div class="audio-empty"><i class="fa-solid fa-headphones"></i><p>Aucun sermon audio pour le moment.</p></div>';
+    return;
+  }
+
+  grid.innerHTML = APP_STATE.audio.map((s) => `
+    <div class="audio-card">
+      <div class="audio-card-top">
+        <div class="audio-card-icon"><i class="fa-solid fa-microphone"></i></div>
+        <div class="audio-card-info">
+          <div class="audio-card-title">${escapeHtml(s.title)}</div>
+          <div class="audio-card-meta">
+            ${s.speaker ? `<span><i class="fa-solid fa-user"></i> ${escapeHtml(s.speaker)}</span>` : ''}
+            ${s.date_text ? `<span><i class="fa-regular fa-calendar"></i> ${escapeHtml(s.date_text)}</span>` : ''}
+            ${s.duration ? `<span><i class="fa-regular fa-clock"></i> ${escapeHtml(s.duration)}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      ${s.description ? `<div class="audio-card-body"><div class="audio-card-desc">${escapeHtml(s.description)}</div></div>` : ''}
+      <div class="audio-card-body">
+        <div class="audio-player-wrap">
+          <audio src="${escapeHtml(s.audio_url)}" controls preload="metadata"></audio>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+
+function openModal(contentHtml) {
+  const overlay = document.getElementById('modal-overlay');
+  const content = document.getElementById('modal-content');
+  if (!overlay || !content) return;
+  content.innerHTML = contentHtml;
+  overlay.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  const overlay = document.getElementById('modal-overlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeModal();
+});
+
+// ─── AUDIO ADMIN ──────────────────────────────────────────────────────────────
+
+let audioEditingId = null;
+
+function renderAdminAudio() {
+  const list = document.getElementById('admin-audio-list');
+  if (!list) return;
+
+  if (!APP_STATE.audio.length) {
+    list.innerHTML = '<p class="admin-empty">Aucun sermon audio.</p>';
+    return;
+  }
+
+  list.innerHTML = APP_STATE.audio.map((s) => `
+    <div class="admin-list-item" style="${audioEditingId === s.id ? 'background:rgba(200,169,81,.1);border:1px solid rgba(200,169,81,.3)' : ''}">
+      <div>
+        <strong>${escapeHtml(s.title)}</strong>
+        <small>${s.speaker ? escapeHtml(s.speaker) + ' — ' : ''}${s.duration ? escapeHtml(s.duration) : ''}</small>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <button class="btn-secondary" onclick="editAudioSermon(${s.id}, '${s.title.replace(/'/g, "\\'")}', '${(s.speaker || '').replace(/'/g, "\\'")}', '${(s.date_text || '').replace(/'/g, "\\'")}', '${(s.duration || '').replace(/'/g, "\\'")}', '${(s.audio_url || '').replace(/'/g, "\\'")}', '${(s.description || '').replace(/'/g, "\\'")}')" style="flex:1;min-width:80px">${audioEditingId === s.id ? 'En édition' : 'Éditer'}</button>
+        <button class="btn-secondary" onclick="removeAudioSermon(${s.id})" style="flex:1;min-width:80px">Supprimer</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function editAudioSermon(id, title, speaker, date_text, duration, audio_url, description) {
+  audioEditingId = id;
+  document.getElementById('admin-audio-title').value = title;
+  document.getElementById('admin-audio-speaker').value = speaker;
+  document.getElementById('admin-audio-date').value = date_text;
+  document.getElementById('admin-audio-duration').value = duration;
+  document.getElementById('admin-audio-url').value = audio_url;
+  document.getElementById('admin-audio-description').value = description;
+  document.getElementById('audio-submit-label').textContent = 'Enregistrer les modifications';
+  renderAdminAudio();
+}
+
+function cancelEditAudio() {
+  audioEditingId = null;
+  ['admin-audio-title','admin-audio-speaker','admin-audio-date','admin-audio-duration','admin-audio-url','admin-audio-description'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.getElementById('audio-submit-label').textContent = 'Ajouter le sermon';
+  renderAdminAudio();
+}
+
+async function saveAudioSermon() {
+  const title = document.getElementById('admin-audio-title')?.value?.trim();
+  const speaker = document.getElementById('admin-audio-speaker')?.value?.trim();
+  const date_text = document.getElementById('admin-audio-date')?.value?.trim();
+  const duration = document.getElementById('admin-audio-duration')?.value?.trim();
+  const audio_url = document.getElementById('admin-audio-url')?.value?.trim();
+  const description = document.getElementById('admin-audio-description')?.value?.trim();
+
+  if (!title || !audio_url) {
+    showToast('Titre et URL audio requis.');
+    return;
+  }
+
+  try {
+    if (audioEditingId) {
+      await api(`/api/admin/audio/${audioEditingId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ title, speaker, date_text, duration, audio_url, description }),
+      });
+      showToast('Sermon modifié.');
+    } else {
+      await api('/api/admin/audio', {
+        method: 'POST',
+        body: JSON.stringify({ title, speaker, date_text, duration, audio_url, description }),
+      });
+      showToast('Sermon ajouté.');
+    }
+    cancelEditAudio();
+    await loadPublicContent();
+    await loadAdminDashboard();
+  } catch {
+    showToast('Opération impossible.');
+  }
+}
+
+async function removeAudioSermon(id) {
+  if (!confirm('Supprimer ce sermon audio ?')) return;
+  try {
+    await api(`/api/admin/audio/${id}`, { method: 'DELETE' });
+    if (audioEditingId === id) cancelEditAudio();
+    await loadPublicContent();
+    await loadAdminDashboard();
+    showToast('Sermon supprimé.');
+  } catch {
+    showToast('Suppression impossible.');
+  }
+}
+
+async function uploadAudioFile(input) {
+  if (!input.files || !input.files[0]) return;
+  const formData = new FormData();
+  formData.append('audio', input.files[0]);
+  try {
+    const res = await fetch('/api/admin/audio/upload', {
+      method: 'POST',
+      credentials: 'same-origin',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok || !data.url) { showToast('Erreur upload : ' + (data.error || 'inconnu')); return; }
+    document.getElementById('admin-audio-url').value = data.url;
+    showToast('Fichier audio uploadé ✓');
+  } catch {
+    showToast('Impossible d\'uploader le fichier.');
   }
 }
 

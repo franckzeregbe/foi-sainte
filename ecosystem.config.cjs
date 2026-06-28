@@ -3,7 +3,6 @@ module.exports = {
     {
       name: 'foi-sainte',
       script: 'server.js',
-      cwd: '/var/www/foi-sainte',
       exec_mode: 'fork',
       instances: 1,
       env: {
@@ -11,10 +10,8 @@ module.exports = {
         PORT: 5500,
         TRUST_PROXY: 1,
       },
-      env_file: '/var/www/foi-sainte/.env.production',
+      env_file: '.env.production',
       max_memory_restart: '500M',
-      error_file: '/var/log/foi-sainte-error.log',
-      out_file: '/var/log/foi-sainte-out.log',
       merge_logs: true,
       time: true,
       autorestart: true,

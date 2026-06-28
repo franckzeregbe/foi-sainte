@@ -7,13 +7,43 @@
   <meta name="description" content="Suivez le culte en direct, priez et participez à la vie de l'Église FOI SAINTE depuis n'importe où. Jude 1:20-21" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="theme-color" content="#c8a951" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=4" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Open+Sans:ital,wght@0,300;0,400;0,600;0,700;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 </head>
 <body>
+
+<!-- ── BACKGROUND PARTICLES ───────────────────────────────── -->
+<div id="bg-particles"></div>
+
+<!-- ─── PAGE LOADER ──────────────────────────────────────────── -->
+<div id="page-loader">
+  <div class="loader-cross"></div>
+  <div class="loader-text">Église FOI SAINTE</div>
+</div>
+
+<!-- ─── SCROLL TO TOP ────────────────────────────────────────── -->
+<button id="scroll-top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Retour en haut">
+  <i class="fa-solid fa-chevron-up"></i>
+</button>
+
+<!-- ─── TOPBAR (inspiré Sungrak) ──────────────────────────── -->
+<div id="topbar" class="topbar">
+  <div class="topbar-inner">
+    <div class="topbar-left">
+      <a href="tel:+2250789362185" class="topbar-link"><i class="fa-solid fa-phone"></i> +225 07 89 36 21 85</a>
+      <a href="mailto:contact@foisainte.com" class="topbar-link"><i class="fa-solid fa-envelope"></i> contact@foisainte.com</a>
+    </div>
+    <div class="topbar-right">
+      <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank" class="topbar-social" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+      <a href="https://www.facebook.com/EgliseFOISAINTE/" target="_blank" class="topbar-social" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+      <a href="https://www.instagram.com/eglisefoisainte/" target="_blank" class="topbar-social" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+      <a href="https://wa.me/2250789362185" target="_blank" class="topbar-social" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+    </div>
+  </div>
+</div>
 
 <!-- ─── HEADER ─────────────────────────────────────────────── -->
 <header id="header">
@@ -26,10 +56,10 @@
       </div>
     </div>
     <nav id="nav">
-      <a href="#accueil" class="nav-link active" onclick="showSection('accueil',this)">Accueil</a>
+      <a href="#accueil" class="nav-link active" onclick="showSection('accueil',this)"><i class="fa-solid fa-house"></i> Accueil</a>
       <div class="nav-dropdown">
         <button class="nav-link nav-dropdown-btn" onclick="toggleNavDropdown(event,'nav-dd-eglise')">
-          Notre Église <i class="fa-solid fa-chevron-down nav-chevron"></i>
+          <i class="fa-solid fa-church"></i> Notre Église <i class="fa-solid fa-chevron-down nav-chevron"></i>
         </button>
         <div class="nav-dropdown-menu" id="nav-dd-eglise">
           <a href="#presentation" class="nav-dropdown-item" onclick="showSection('presentation',null);closeNavDropdown()">
@@ -37,6 +67,9 @@
           </a>
           <a href="#vision" class="nav-dropdown-item" onclick="showSection('vision',null);closeNavDropdown()">
             <i class="fa-solid fa-eye"></i> Vision &amp; Mission
+          </a>
+          <a href="#confessions" class="nav-dropdown-item" onclick="showSection('confessions',null);closeNavDropdown()">
+            <i class="fa-solid fa-book-bible"></i> Nos Confessions
           </a>
           <a href="#histoire" class="nav-dropdown-item" onclick="showSection('histoire',null);closeNavDropdown()">
             <i class="fa-solid fa-book-open"></i> Notre Histoire
@@ -48,20 +81,23 @@
       </div>
       <div class="nav-dropdown">
         <button class="nav-link nav-dropdown-btn" onclick="toggleNavDropdown(event,'nav-dd-cultes')">
-          Cultes <i class="fa-solid fa-chevron-down nav-chevron"></i>
+          <i class="fa-solid fa-video"></i> Cultes <i class="fa-solid fa-chevron-down nav-chevron"></i>
         </button>
         <div class="nav-dropdown-menu" id="nav-dd-cultes">
           <a href="#live" class="nav-dropdown-item" onclick="showSection('live',null);closeNavDropdown()">
-            <i class="fa-solid fa-circle-dot blink" style="color:#da3f3f;font-size:.6rem"></i> Culte en Direct
+            <i class="fa-solid fa-circle-dot blink" style="color:#e53e3e;font-size:.6rem"></i> Culte en Direct
           </a>
           <a href="#replays" class="nav-dropdown-item" onclick="showSection('replays',null);closeNavDropdown()">
-            <i class="fa-solid fa-film"></i> Revoir le Culte
+            <i class="fa-solid fa-film"></i> Archives des Cultes
+          </a>
+          <a href="#audio" class="nav-dropdown-item" onclick="showSection('audio',null);closeNavDropdown()">
+            <i class="fa-solid fa-headphones"></i> Sermons Audio
           </a>
         </div>
       </div>
       <div class="nav-dropdown">
         <button class="nav-link nav-dropdown-btn" onclick="toggleNavDropdown(event,'nav-dd-priere')">
-          Espace de Prière <i class="fa-solid fa-chevron-down nav-chevron"></i>
+          <i class="fa-solid fa-hands-praying"></i> Prière <i class="fa-solid fa-chevron-down nav-chevron"></i>
         </button>
         <div class="nav-dropdown-menu" id="nav-dd-priere">
           <a href="#priere" class="nav-dropdown-item" onclick="showSection('priere',null);closeNavDropdown()">
@@ -72,13 +108,67 @@
           </a>
         </div>
       </div>
-      <a href="#don" class="nav-link" onclick="showSection('don',this)">Faire un Don</a>
+      <a href="#don" class="nav-link" onclick="showSection('don',this)"><i class="fa-solid fa-hand-holding-heart"></i> Dons</a>
     </nav>
-    <button class="nav-toggle" onclick="toggleMenu()" aria-label="Menu">
+    <button class="nav-toggle" onclick="toggleDrawer()" aria-label="Menu">
       <i class="fa-solid fa-bars"></i>
     </button>
   </div>
 </header>
+
+<!-- ─── MOBILE DRAWER ──────────────────────────── -->
+<div id="nav-drawer-overlay" class="nav-drawer-overlay" onclick="closeDrawer()"></div>
+<div id="nav-drawer" class="nav-drawer">
+  <div class="nav-drawer-header">
+    <img src="logo-foi-sainte.jpg" alt="FOI SAINTE" class="logo-img" />
+    <div class="logo-text">
+      <span class="logo-eglise">Église</span>
+      <span class="logo-nom">FOI SAINTE</span>
+    </div>
+    <button class="nav-drawer-close" onclick="closeDrawer()" aria-label="Fermer le menu">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
+  </div>
+  <a href="#accueil" class="nav-link active" onclick="showSection('accueil',this);closeDrawer()"><i class="fa-solid fa-house"></i> Accueil</a>
+  <div class="nav-dropdown">
+    <button class="nav-dropdown-btn" onclick="toggleNavDropdown(event,'drawer-dd-eglise')">
+      <i class="fa-solid fa-church"></i> Notre Église <i class="fa-solid fa-chevron-down nav-chevron"></i>
+    </button>
+    <div class="nav-dropdown-menu" id="drawer-dd-eglise">
+      <a href="#presentation" class="nav-dropdown-item" onclick="showSection('presentation',null);closeDrawer()"><i class="fa-solid fa-church"></i> Présentation</a>
+      <a href="#vision" class="nav-dropdown-item" onclick="showSection('vision',null);closeDrawer()"><i class="fa-solid fa-eye"></i> Vision &amp; Mission</a>
+      <a href="#confessions" class="nav-dropdown-item" onclick="showSection('confessions',null);closeDrawer()"><i class="fa-solid fa-book-bible"></i> Nos Confessions</a>
+      <a href="#histoire" class="nav-dropdown-item" onclick="showSection('histoire',null);closeDrawer()"><i class="fa-solid fa-book-open"></i> Notre Histoire</a>
+      <a href="#equipe" class="nav-dropdown-item" onclick="showSection('equipe',null);closeDrawer()"><i class="fa-solid fa-users"></i> Équipe Pastorale</a>
+    </div>
+  </div>
+  <div class="nav-dropdown">
+    <button class="nav-dropdown-btn" onclick="toggleNavDropdown(event,'drawer-dd-cultes')">
+      <i class="fa-solid fa-video"></i> Cultes <i class="fa-solid fa-chevron-down nav-chevron"></i>
+    </button>
+    <div class="nav-dropdown-menu" id="drawer-dd-cultes">
+      <a href="#live" class="nav-dropdown-item" onclick="showSection('live',null);closeDrawer()"><i class="fa-solid fa-circle-dot blink" style="color:#e53e3e;font-size:.6rem"></i> Culte en Direct</a>
+      <a href="#replays" class="nav-dropdown-item" onclick="showSection('replays',null);closeDrawer()"><i class="fa-solid fa-film"></i> Archives des Cultes</a>
+      <a href="#audio" class="nav-dropdown-item" onclick="showSection('audio',null);closeDrawer()"><i class="fa-solid fa-headphones"></i> Sermons Audio</a>
+    </div>
+  </div>
+  <div class="nav-dropdown">
+    <button class="nav-dropdown-btn" onclick="toggleNavDropdown(event,'drawer-dd-priere')">
+      <i class="fa-solid fa-hands-praying"></i> Prière <i class="fa-solid fa-chevron-down nav-chevron"></i>
+    </button>
+    <div class="nav-dropdown-menu" id="drawer-dd-priere">
+      <a href="#priere" class="nav-dropdown-item" onclick="showSection('priere',null);closeDrawer()"><i class="fa-solid fa-hands-praying"></i> Sujets de Prière</a>
+      <a href="#temoignage" class="nav-dropdown-item" onclick="showSection('temoignage',null);closeDrawer()"><i class="fa-solid fa-star"></i> Témoignages</a>
+    </div>
+  </div>
+  <a href="#don" class="nav-link" onclick="showSection('don',this);closeDrawer()"><i class="fa-solid fa-hand-holding-heart"></i> Dons</a>
+  <div class="nav-drawer-social">
+    <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+    <a href="https://www.facebook.com/EgliseFOISAINTE/" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+    <a href="https://www.instagram.com/eglisefoisainte/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+    <a href="https://wa.me/2250789362185" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+  </div>
+</div>
 
 <!-- ─── NOTIFICATION BAR ───────────────────────────────────── -->
 <div id="notif-bar" class="notif-bar" style="display:none">
@@ -89,100 +179,120 @@
 
 <!-- ═══════════════════════════════════════════════════════════
      SECTION 1 — ACCUEIL
-═══════════════════════════════════════════════════════════════ -->
+═══════════════════════════════════════════════════════════ -->
 <section id="section-accueil" class="section active">
 
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-overlay"></div>
-
-    <!-- Horloge positionnée directement dans le hero, hors du bloc centré -->
-    <div class="hero-clock" aria-live="polite" aria-label="Horloge en temps réel">
-      <span class="hero-clock-label"><i class="fa-regular fa-clock"></i> Heure locale</span>
-      <strong id="hero-clock-time" class="hero-clock-time">--:--:--</strong>
-      <span id="hero-clock-date" class="hero-clock-date">-- --- ----</span>
+  <!-- ── HERO PRINCIPAL ────────────────────────────────────── -->
+  <div class="home-hero">
+    <div class="home-hero-bg">
+      <img src="/logo-foi-sainte.jpg" alt="" class="hero-logo-bg" />
     </div>
-
-    <div class="hero-content">
-      <p class="hero-bienvenue">BIENVENUE AU</p>
-      <h1 class="hero-title">CULTE EN LIGNE !</h1>
-
-      <!-- Verset du Jour -->
-      <div class="verset-card">
-        <p class="verset-label" id="message-type-label"><i class="fa-solid fa-sun"></i> MESSAGE DU JOUR</p>
-        <blockquote id="verset-texte" class="verset-texte"></blockquote>
-        <cite id="verset-ref" class="verset-ref"></cite>
-      </div>
-
-      <!-- Live badge -->
-      <div id="live-badge" class="live-badge" style="display:none">
-        <span class="dot-live"></span> EN DIRECT – <span id="viewers-count">0</span> en ligne
-      </div>
-
-      <!-- CTAs -->
-      <div class="hero-ctas">
-        <button class="btn-primary btn-live-pulse" onclick="showSection('live', document.querySelector('[href=\'#live\']'))">
-          <i class="fa-solid fa-circle-play"></i> Participer au Culte EN DIRECT
+    <div class="home-hero-content">
+      <h1 class="home-hero-title">Bienvenue à <span>FOI SAINTE</span></h1>
+      <p class="home-hero-sub">La vie de la Foi selon le SAINT-ESPRIT</p>
+      <div class="home-hero-ctas">
+        <button class="btn-hero-primary" onclick="showSection('live',null)">
+          <i class="fa-solid fa-circle-play"></i> Culte en Direct
         </button>
-        <button class="btn-secondary" onclick="showSection('replays', document.querySelector('[href=\'#replays\']'))">
-          <i class="fa-regular fa-clock"></i> Revoir le Culte
+        <button class="btn-hero-secondary" onclick="showSection('presentation',null)">
+          <i class="fa-solid fa-church"></i> Découvrir l'Église
         </button>
       </div>
+    </div>
+    <div class="hero-verse">
+      <div class="hero-verse-top">
+        <span class="hero-verse-tag"><i class="fa-solid fa-book-bible"></i> Message du jour</span>
+        <span class="hero-clock" id="hero-clock"></span>
+      </div>
+      <blockquote id="verset-texte-hero" class="hero-verse-text"></blockquote>
+      <cite id="verset-ref-hero" class="hero-verse-ref"></cite>
     </div>
   </div>
 
-  <!-- Quick Links Bar -->
-  <div class="quick-bar">
-    <!-- Filigrane flamme dans hero -->
-    <div class="flame-watermark hero-flame" aria-hidden="true"></div>
-    <button class="quick-item" onclick="showSection('priere',null)">
-      <div class="quick-icon-wrap">
-        <i class="fa-solid fa-person-praying"></i>
+  <!-- ── ACTIONS RAPIDES ───────────────────────────────────── -->
+  <div class="container home-section">
+    <div class="home-quick-actions">
+      <button class="home-quick-btn" onclick="showSection('priere',null)">
+        <div class="home-quick-icon hqi-green"><i class="fa-solid fa-person-praying"></i></div>
+        <span>Priere</span>
+      </button>
+      <button class="home-quick-btn" onclick="showSection('don',null)">
+        <div class="home-quick-icon hqi-orange"><i class="fa-solid fa-hand-holding-heart"></i></div>
+        <span>Don</span>
+      </button>
+      <button class="home-quick-btn" onclick="showSection('replays',null)">
+        <div class="home-quick-icon hqi-blue"><i class="fa-solid fa-film"></i></div>
+        <span>Replays</span>
+      </button>
+      <button class="home-quick-btn" onclick="showSection('temoignage',null)">
+        <div class="home-quick-icon hqi-gold"><i class="fa-solid fa-star"></i></div>
+        <span>Temoignage</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── PROGRAMME DE LA SEMAINE ───────────────────────────── -->
+  <div class="container home-section">
+    <div class="home-card home-card--programme">
+      <div class="home-card-header">
+        <div class="home-card-icon"><i class="fa-solid fa-calendar-week"></i></div>
+        <h3>Programme de la Semaine</h3>
       </div>
-      <div>
-        <strong>Espace de Prière</strong>
-        <small>Déposer une intention</small>
-      </div>
-    </button>
-    <button class="quick-item" onclick="showSection('don', document.querySelector('[href=\'#don\']'))">
-      <div class="quick-icon-wrap">
-        <i class="fa-solid fa-hand-holding-heart"></i>
-      </div>
-      <div>
-        <strong>Faire un Don</strong>
-        <small>Soutenir la mission</small>
-      </div>
-    </button>
-    <div class="quick-item quick-social">
-      <div class="quick-icon-wrap">
-        <i class="fa-solid fa-earth-africa"></i>
-      </div>
-        <strong>Suivez-nous</strong>
-        <div class="social-links">
-          <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
-          <a href="https://www.facebook.com/EgliseFOISAINTE/" target="_blank" title="Facebook"><i class="fa-brands fa-facebook"></i></a>
-          <a href="https://www.instagram.com/eglisefoisainte/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
-          <a href="https://wa.me/2250789362185" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      <div class="home-card-body">
+        <div class="programme-list" id="programme-weekly-list">
+          <div class="programme-item highlight">
+            <div class="programme-jour">Dimanche</div>
+            <div class="programme-type"><strong>Culte Dominical</strong><span>Culte</span></div>
+            <div class="programme-heure"><i class="fa-regular fa-clock"></i> 10h00</div>
+          </div>
+          <div class="programme-item">
+            <div class="programme-jour">Mercredi</div>
+            <div class="programme-type"><strong>Étude de la Parole</strong><span>Étude Biblique</span></div>
+            <div class="programme-heure"><i class="fa-regular fa-clock"></i> 19h00</div>
+          </div>
+          <div class="programme-item">
+            <div class="programme-jour">Vendredi</div>
+            <div class="programme-type"><strong>Soirée de Prière</strong><span>Prière</span></div>
+            <div class="programme-heure"><i class="fa-regular fa-clock"></i> 19h30</div>
+          </div>
+          <div class="programme-item">
+            <div class="programme-jour">Samedi</div>
+            <div class="programme-type"><strong>Répétition Louange</strong><span>Louange</span></div>
+            <div class="programme-heure"><i class="fa-regular fa-clock"></i> 16h00</div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Prochains Cultes -->
-  <div class="container section-block">
-    <h2 class="section-title"><i class="fa-regular fa-calendar"></i> Prochains Cultes</h2>
-    <div class="agenda-grid" id="agenda-grid"></div>
+  <!-- ── VERSET DE L'EGLISE ────────────────────────────────── -->
+  <div class="container home-section">
+    <div class="home-card home-card--verse">
+      <div class="home-card-body" style="padding:1.2rem 1.5rem">
+        <blockquote class="home-verse-text">
+          « Mais vous, bien-aimes, vous edifiant vous-memes sur votre tres sainte foi, et priant par le Saint-Esprit, conservez-vous dans l'amour de Dieu, en attendant la misericorde de notre Seigneur Jesus-Christ pour la vie eternelle. »
+        </blockquote>
+        <cite class="home-verse-ref">— Jude 1 : 20-21 —</cite>
+      </div>
+    </div>
   </div>
 
-  <!-- Verset de l'Église -->
-  <div class="eglise-verset-banner">
-    <div class="flame-watermark banner-flame" aria-hidden="true"></div>
-    <div class="evb-inner">
-      <p class="evb-label"><i class="fa-solid fa-book-bible"></i> Verset de l'Église</p>
-      <blockquote class="evb-texte">
-        « Mais vous, bien-aimés, vous édifiant vous-mêmes sur votre très sainte foi, et priant par le Saint-Esprit, conservez-vous dans l'amour de Dieu, en attendant la miséricorde de notre Seigneur Jésus-Christ pour la vie éternelle. »
-      </blockquote>
-      <cite class="evb-ref">— Jude 1 : 20-21 —</cite>
+  <!-- ── RESEAUX SOCIAUX ───────────────────────────────────── -->
+  <div class="container home-section" style="text-align:center">
+    <p style="color:var(--text-main);font-size:1.1rem;font-weight:700;margin-bottom:0.6rem">Suivez-nous</p>
+    <div class="home-social-links" style="justify-content:center">
+      <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank" class="home-social-btn" title="YouTube">
+        <i class="fa-brands fa-youtube"></i>
+      </a>
+      <a href="https://www.facebook.com/EgliseFOISAINTE/" target="_blank" class="home-social-btn" title="Facebook">
+        <i class="fa-brands fa-facebook-f"></i>
+      </a>
+      <a href="https://www.instagram.com/eglisefoisainte/" target="_blank" class="home-social-btn" title="Instagram">
+        <i class="fa-brands fa-instagram"></i>
+      </a>
+      <a href="https://wa.me/2250789362185" target="_blank" class="home-social-btn" title="WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+      </a>
     </div>
   </div>
 
@@ -195,9 +305,8 @@
   <div class="eglise-hero">
     <div class="eglise-hero-overlay"></div>
     <div class="eglise-hero-content">
-      <p class="hero-bienvenue">BIENVENUE DANS</p>
       <h1 class="hero-title" id="eglise-nom-display">ÉGLISE FOI SAINTE</h1>
-      <p class="eglise-hero-sub" id="eglise-slogan-display">Édifiés sur la foi, marchant dans l'amour</p>
+      <p class="eglise-hero-sub">Édifiés sur la foi, marchant dans l'amour — Jude 1:20-21</p>
     </div>
   </div>
   <div class="container">
@@ -259,6 +368,9 @@
 <section id="section-vision" class="section">
   <div class="sous-section-hero" style="--accent:#d4af37">
     <div class="sous-section-hero-inner">
+      <button class="btn-back" onclick="showSection('presentation',null)">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </button>
       <i class="fa-solid fa-eye sous-section-icon"></i>
       <h1>Vision &amp; Mission</h1>
       <p>Église FOI SAINTE — Ancrés sur la Parole de Dieu</p>
@@ -276,10 +388,17 @@
         <h3>Notre Mission</h3>
         <p id="eglise-mission-display">Évangéliser, former des disciples, adorer Dieu en esprit et en vérité, et servir notre prochain avec amour et compassion.</p>
       </div>
-      <div class="eglise-vm-card">
+      <div class="eglise-vm-card valeurs-card">
         <div class="eglise-vm-icon"><i class="fa-solid fa-heart"></i></div>
         <h3>Nos Valeurs</h3>
-        <p id="eglise-valeurs-display">Foi, Prière, Fraternité, Intégrité, Service. Nous croyons en la puissance transformatrice de l'Évangile de Jésus-Christ.</p>
+        <div class="valeurs-list" id="eglise-valeurs-display">
+          <span class="valeur-badge">Foi</span>
+          <span class="valeur-badge">Prière</span>
+          <span class="valeur-badge">Fraternité</span>
+          <span class="valeur-badge">Intégrité</span>
+          <span class="valeur-badge">Service</span>
+        </div>
+        <p class="valeurs-texte">Nous croyons en la puissance transformatrice de l'Évangile de Jésus-Christ.</p>
       </div>
     </div>
     <div class="eglise-cta-section" style="margin-top:2rem">
@@ -301,6 +420,9 @@
 <section id="section-histoire" class="section">
   <div class="sous-section-hero" style="--accent:#3498db">
     <div class="sous-section-hero-inner">
+      <button class="btn-back" onclick="showSection('presentation',null)">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </button>
       <i class="fa-solid fa-book-open sous-section-icon"></i>
       <h1>Notre Histoire</h1>
       <p>Les fondements de l'Église FOI SAINTE</p>
@@ -332,6 +454,9 @@
 <section id="section-equipe" class="section">
   <div class="sous-section-hero" style="--accent:#e67e22">
     <div class="sous-section-hero-inner">
+      <button class="btn-back" onclick="showSection('presentation',null)">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </button>
       <i class="fa-solid fa-users sous-section-icon"></i>
       <h1>Équipe Pastorale</h1>
       <p>Ceux que Dieu a placés pour vous servir</p>
@@ -358,7 +483,7 @@
 <section id="section-live" class="section">
   <div class="container">
     <div class="live-header">
-      <h2 class="section-title"><span class="dot-live"></span> CULTE EN DIRECT</h2>
+      <h2 class="page-header-title"><span class="dot-live"></span> CULTE EN DIRECT</h2>
     </div>
     <div class="flame-watermark live-flame" aria-hidden="true"></div>
 
@@ -372,9 +497,13 @@
             title="Culte en Direct – Église FOI SAINTE"
             frameborder="0"
             allow="autoplay; encrypted-media; picture-in-picture"
+            referrerpolicy="strict-origin-when-cross-origin"
             allowfullscreen>
           </iframe>
         </div>
+
+        <!-- Debug (visible seulement pour diagnostic) -->
+        <div id="live-debug-src" style="margin-top:.75rem;font-size:.75rem;color:rgba(255,255,255,.6);word-break:break-all;opacity:.9"></div>
 
         <!-- Verset en direct -->
         <div class="live-verset-bar">
@@ -422,12 +551,19 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════
-     SECTION 3 — REPLAYS
-═══════════════════════════════════════════════════════════════ -->
+     SECTION 3 — REPLAYS (Archives par année)
+═══════════════════════════════════════════════════════════ -->
 <section id="section-replays" class="section">
   <div class="container">
-    <h2 class="section-title"><i class="fa-solid fa-film"></i> Revoir le Culte</h2>
-    <p class="section-subtitle">Retrouvez tous nos cultes en replay ci-dessous.</p>
+    <h2 class="page-header-title"><i class="fa-solid fa-film"></i> Archives des Cultes</h2>
+    <p class="page-header-subtitle">Retrouvez tous nos cultes en replay, organisés par année.</p>
+
+    <!-- Filtres par année -->
+    <div class="year-filter" id="year-filter">
+      <button class="year-btn active" onclick="filterReplaysByYear('all', this)">Toutes</button>
+    </div>
+
+    <!-- Grille des replays -->
     <div class="replay-grid" id="replay-grid"></div>
 
     <div class="replay-cta">
@@ -439,11 +575,25 @@
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════
+     SECTION — SERMONS AUDIO
+═══════════════════════════════════════════════════════════ -->
+<section id="section-audio" class="section">
+  <div class="container">
+    <h2 class="page-header-title"><i class="fa-solid fa-headphones"></i> Sermons Audio</h2>
+    <p class="page-header-subtitle">Écoutez les prédications et enseignements de l'Église FOI SAINTE.</p>
+    <div id="audio-list" class="audio-grid"></div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
      SECTION 4 — SUJETS DE PRIÈRE
-═══════════════════════════════════════════════════════════════ -->
+═══════════════════════════════════════════════════════════ -->
 <section id="section-priere" class="section">
   <div class="sous-section-hero" style="--accent:#9b59b6">
     <div class="sous-section-hero-inner">
+      <button class="btn-back" onclick="showSection('accueil',null)">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </button>
       <i class="fa-solid fa-hands-praying sous-section-icon"></i>
       <h1>Sujets de Prière</h1>
       <p>Déposez votre intention — <em>Nous prions pour vous !</em></p>
@@ -495,6 +645,9 @@
 <section id="section-temoignage" class="section">
   <div class="sous-section-hero" style="--accent:#f39c12">
     <div class="sous-section-hero-inner">
+      <button class="btn-back" onclick="showSection('accueil',null)">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </button>
       <i class="fa-solid fa-star sous-section-icon"></i>
       <h1>Témoignages</h1>
       <p>Partagez ce que Dieu a fait dans votre vie</p>
@@ -546,8 +699,8 @@
   <div class="container">
     <div class="don-header">
       <i class="fa-solid fa-hand-holding-heart don-icon"></i>
-      <h2 class="section-title">FAIRE UN DON</h2>
-      <p class="section-subtitle">Votre offrande soutient la mission et les projets de l'Église FOI SAINTE.</p>
+      <h2 class="page-header-title">FAIRE UN DON</h2>
+      <p class="page-header-subtitle">Votre offrande soutient la mission et les projets de l'Église FOI SAINTE.</p>
     </div>
 
     <div class="don-grid" id="don-grid"></div>
@@ -606,6 +759,9 @@
             </button>
             <button class="admin-sidenav-item" onclick="showAdminPanel('replays', this)">
               <i class="fa-solid fa-film"></i> Replays
+            </button>
+            <button class="admin-sidenav-item" onclick="showAdminPanel('audio', this)">
+              <i class="fa-solid fa-headphones"></i> Audio
             </button>
             <button class="admin-sidenav-item" onclick="showAdminPanel('agenda', this)">
               <i class="fa-regular fa-calendar"></i> Agenda
@@ -742,6 +898,32 @@
 
               <input id="don-currency" type="text" placeholder="Devise (XOF, EUR, USD...)" maxlength="8" />
               <button class="btn-primary btn-full" onclick="saveDonationsSettings()">Enregistrer les modes de paiement</button>
+            </div>
+          </div>
+
+          <!-- Panneau : Audio -->
+          <div class="admin-panel" id="admin-panel-audio">
+            <div class="admin-card">
+              <h3><i class="fa-solid fa-headphones"></i> Sermons Audio</h3>
+              <p class="admin-help">Ajoutez des sermons audio. Vous pouvez uploader un fichier ou coller une URL.</p>
+              <div class="admin-replay-form">
+                <input id="admin-audio-title" type="text" placeholder="Titre du sermon" />
+                <div style="display:flex;gap:.5rem">
+                  <input id="admin-audio-speaker" type="text" placeholder="Prédicateur" style="flex:1" />
+                  <input id="admin-audio-date" type="text" placeholder="Date (ex: 21 juin 2026)" style="flex:1" />
+                  <input id="admin-audio-duration" type="text" placeholder="Durée (ex: 45:30)" style="width:100px" />
+                </div>
+                <div style="display:flex;gap:.5rem;align-items:center">
+                  <input id="admin-audio-url" type="text" placeholder="URL du fichier audio (.mp3)" style="flex:1" />
+                  <label class="btn-secondary" style="cursor:pointer;white-space:nowrap">
+                    <i class="fa-solid fa-upload"></i> Upload
+                    <input type="file" accept="audio/*" style="display:none" onchange="uploadAudioFile(this)" />
+                  </label>
+                </div>
+                <textarea id="admin-audio-description" rows="2" placeholder="Description (optionnelle)"></textarea>
+                <button class="btn-primary btn-full" onclick="saveAudioSermon()"><i class="fa-solid fa-floppy-disk"></i> <span id="audio-submit-label">Ajouter le sermon</span></button>
+              </div>
+              <div id="admin-audio-list" class="admin-list"></div>
             </div>
           </div>
 
@@ -971,38 +1153,130 @@
   </div>
 </section>
 
-<!-- ─── FOOTER ─────────────────────────────────────────────── -->
-<footer>
-  <div class="footer-inner">
-    <div class="footer-logo">
-      <img src="logo-foi-sainte.jpg" alt="FOI SAINTE" class="logo-img footer-logo-img" />
-      <div>
-        <span class="logo-eglise">Église</span>
-        <span class="logo-nom">FOI SAINTE</span>
+<!-- ═══════════════════════════════════════════════════════════
+     SECTION — NOS CONFESSIONS
+═══════════════════════════════════════════════════════════ -->
+<section id="section-confessions" class="section">
+  <div class="sous-section-hero" style="--accent:#1abc9c">
+    <div class="sous-section-hero-inner">
+      <button class="btn-back" onclick="showSection('presentation',null)">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </button>
+      <i class="fa-solid fa-book-bible sous-section-icon"></i>
+      <h1>Nos Confessions</h1>
+      <p>Les fondements de notre foi chrétienne</p>
+    </div>
+  </div>
+  <div class="container">
+    <div class="confessions-grid" style="margin-top:2.5rem">
+      <div class="confession-card">
+        <div class="confession-icon"><i class="fa-solid fa-cross"></i></div>
+        <h3>La Trinité</h3>
+        <p>Nous croyons en un seul Dieu, éternel, tout-puissant, qui existe en trois personnes : le Père, le Fils et le Saint-Esprit.</p>
+      </div>
+      <div class="confession-card">
+        <div class="confession-icon"><i class="fa-solid fa-dove"></i></div>
+        <h3>La Bible</h3>
+        <p>Nous croyons que la Bible est la Parole inspirée de Dieu, sans erreur, unique autorité en matière de foi et de conduite.</p>
+      </div>
+      <div class="confession-card">
+        <div class="confession-icon"><i class="fa-solid fa-heart"></i></div>
+        <h3>Le Salut</h3>
+        <p>Nous croyons que le salut est un don gratuit de Dieu, obtenu par la seule grâce de Dieu, par la foi en Jésus-Christ.</p>
+      </div>
+      <div class="confession-card">
+        <div class="confession-icon"><i class="fa-solid fa-water"></i></div>
+        <h3>Le Baptême</h3>
+        <p>Nous croyons que le baptême par immersion est un acte d'obéissance, symbole de notre mort et résurrection avec Christ.</p>
+      </div>
+      <div class="confession-card">
+        <div class="confession-icon"><i class="fa-solid fa-bread-slice"></i></div>
+        <h3>La Cène</h3>
+        <p>Nous croyons que la Cène est un mémorial de la mort de Jésus-Christ, célébré par les croyants en attendant son retour.</p>
+      </div>
+      <div class="confession-card">
+        <div class="confession-icon"><i class="fa-solid fa-people-group"></i></div>
+        <h3>L'Église</h3>
+        <p>Nous croyons que l'Église est le corps de Christ sur terre, composée de tous les croyants régénérés par le Saint-Esprit.</p>
       </div>
     </div>
-    <div class="footer-links">
-      <a onclick="showSection('accueil',null)">Accueil</a>
-      <a onclick="showSection('presentation',null)">Notre Église</a>
-      <a onclick="showSection('live',null)">Culte en Direct</a>
-      <a onclick="showSection('replays',null)">Replays</a>
-      <a onclick="showSection('priere',null)">Prière</a>
-      <a onclick="showSection('temoignage',null)">Témoignages</a>
-      <a onclick="showSection('don',null)">Don</a>
+    <div class="eglise-verset-banner" style="margin-top:3rem">
+      <div class="evb-inner">
+        <p class="evb-label"><i class="fa-solid fa-book-bible"></i> Verset de confession</p>
+        <blockquote class="evb-texte">« Je crois en Dieu le Père tout-puissant, créateur du ciel et de la terre, et en Jésus-Christ, son Fils unique, notre Seigneur… »</blockquote>
+        <cite class="evb-ref">— Symbole des Apôtres —</cite>
+      </div>
     </div>
-    <div class="footer-social">
-      <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank"><i class="fa-brands fa-youtube"></i></a>
-      <a href="https://facebook.com/EgliseFoiSainte" target="_blank"><i class="fa-brands fa-facebook"></i></a>
-      <a href="https://www.instagram.com/eglisefoisainte/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
-      <a href="https://wa.me/groupEgliseFoiSainte" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+  </div>
+</section>
+
+<!-- ─── FOOTER PROFESSIONNEL (inspiré Sungrak) ───────────────── -->
+<footer id="main-footer">
+  <div class="footer-top">
+    <div class="footer-col footer-col--brand">
+      <div class="footer-logo">
+        <img src="logo-foi-sainte.jpg" alt="FOI SAINTE" class="logo-img footer-logo-img" />
+        <div>
+          <span class="logo-eglise">Église</span>
+          <span class="logo-nom">FOI SAINTE</span>
+        </div>
+      </div>
+      <p class="footer-tagline">« Édifiés sur la foi, marchant dans l'amour »</p>
+      <p class="footer-address"><i class="fa-solid fa-location-dot"></i> Abidjan, Côte d'Ivoire</p>
+      <p class="footer-address"><i class="fa-solid fa-phone"></i> +225 07 89 36 21 85</p>
+      <p class="footer-address"><i class="fa-solid fa-envelope"></i> contact@foisainte.com</p>
+    </div>
+    <div class="footer-col">
+      <h4 class="footer-col-title">Navigation</h4>
+      <ul class="footer-nav">
+        <li><a onclick="showSection('accueil',null)"><i class="fa-solid fa-chevron-right"></i> Accueil</a></li>
+        <li><a onclick="showSection('presentation',null)"><i class="fa-solid fa-chevron-right"></i> Notre Église</a></li>
+        <li><a onclick="showSection('live',null)"><i class="fa-solid fa-chevron-right"></i> Culte en Direct</a></li>
+        <li><a onclick="showSection('replays',null)"><i class="fa-solid fa-chevron-right"></i> Archives des Cultes</a></li>
+        <li><a onclick="showSection('audio',null)"><i class="fa-solid fa-chevron-right"></i> Sermons Audio</a></li>
+        <li><a onclick="showSection('confessions',null)"><i class="fa-solid fa-chevron-right"></i> Nos Confessions</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 class="footer-col-title">Communauté</h4>
+      <ul class="footer-nav">
+        <li><a onclick="showSection('priere',null)"><i class="fa-solid fa-chevron-right"></i> Espace de Prière</a></li>
+        <li><a onclick="showSection('temoignage',null)"><i class="fa-solid fa-chevron-right"></i> Témoignages</a></li>
+        <li><a onclick="showSection('don',null)"><i class="fa-solid fa-chevron-right"></i> Giving / Dons</a></li>
+        <li><a onclick="showSection('equipe',null)"><i class="fa-solid fa-chevron-right"></i> Équipe Pastorale</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4 class="footer-col-title">Horaires</h4>
+      <ul class="footer-nav footer-nav--schedule">
+        <li><i class="fa-solid fa-clock"></i> <strong>Dimanche</strong> — Culte 10h00</li>
+        <li><i class="fa-solid fa-clock"></i> <strong>Mercredi</strong> — Étude 19h00</li>
+        <li><i class="fa-solid fa-clock"></i> <strong>Vendredi</strong> — Veillée 21h00</li>
+      </ul>
+      <div class="footer-social">
+        <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+        <a href="https://facebook.com/EgliseFoiSainte" target="_blank" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+        <a href="https://www.instagram.com/eglisefoisainte/" target="_blank" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+        <a href="https://wa.me/2250789362185" target="_blank" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+      </div>
     </div>
   </div>
   <div class="footer-copy">
-    &copy; 2026 Église FOI SAINTE — Tous droits réservés &nbsp;|&nbsp;
-    <em>« …conservez-vous dans l'amour de Dieu… » — Jude 1:20-21</em>
-    <a href="#admin" onclick="showSection('admin',null)" class="footer-admin-link" title="Accès privé"><i class="fa-solid fa-lock"></i></a>
+    <div class="footer-copy-inner">
+      <span>&copy; 2026 Église FOI SAINTE — Tous droits réservés</span>
+      <span class="footer-verse"><i class="fa-solid fa-book-bible"></i> « …conservez-vous dans l'amour de Dieu… » — Jude 1:20-21</span>
+      <a href="#admin" onclick="showSection('admin',null)" class="footer-admin-link" title="Accès privé"><i class="fa-solid fa-lock"></i> Admin</a>
+    </div>
   </div>
 </footer>
+
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+    <div id="modal-content"></div>
+  </div>
+</div>
 
 <!-- Toast notification -->
 <div id="toast" class="toast"></div>
@@ -1016,6 +1290,6 @@
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="app.js"></script>
+<script src="app.js?v=5"></script>
 </body>
 </html>

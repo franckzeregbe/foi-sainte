@@ -14,11 +14,111 @@ const webpush = require('web-push');
 const cron = require('node-cron');
 require('dotenv').config();
 
+/**
+ * YouTube LIVE (sans API key) — polling par scraping.
+ *
+ * On évite /channel/.../live (souvent bloqué/différent) et on interroge directement l'embed live_stream,
+ * puis on extrait un “live” via indices texte présents dans la réponse.
+ */
+const YOUTUBE_CHANNEL_ID = 'UCleCSmPU4mCUJiVuS7SXEdA';
+const YOUTUBE_LIVE_CHECK_INTERVAL_MS = 60_000; // ~1 min
+let ytLivePollTimer = null;
+
+function detectIsLiveFromEmbedHtml(html) {
+  const s = String(html || '');
+
+  // Heuristiques (YouTube peut changer, on garde plusieurs patterns)
+  if (/(isLiveBroadcast"\s*:\s*true)/i.test(s)) return true;
+  if (/(liveBroadcastContent"\s*:\s*"none")/i.test(s)) return false;
+  if (/(status"\s*:\s*"LIVE")/i.test(s)) return true;
+  if (/(isLive"\s*:\s*true)/i.test(s)) return true;
+
+  // fallback : si on ne sait pas, on considère “pas live”
+  return false;
+}
+
+async function pollYouTubeLiveOnce() {
+  try {
+    const embedUrl = `https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}`;
+    const resp = await fetch(embedUrl, {
+      method: 'GET',
+      headers: {
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36',
+        'accept-language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
+      },
+    });
+
+    if (!resp.ok) return;
+
+    const html = await resp.text();
+    const isLive = detectIsLiveFromEmbedHtml(html);
+
+    const current = getSettingJson('live', {
+      streamUrl: '',
+      liveVerseText: `"${DEFAULT_VERSE.texte}" — ${DEFAULT_VERSE.ref}`,
+      liveVideoId: '',
+      isLive: false,
+    });
+
+    // Tentative d'extraction du vrai videoId du live
+    // (YouTube met en page des IDs dans différents patterns)
+    const patterns = [
+      /"videoId"\s*:\s*"([A-Za-z0-9_-]{11})"/,
+      /"videoId"\s*:\s*'([A-Za-z0-9_-]{11})'/,
+      /\/watch\?v=([A-Za-z0-9_-]{11})/,
+      /"video_id"\s*:\s*"([A-Za-z0-9_-]{11})"/,
+    ];
+
+    let videoId = '';
+    for (const re of patterns) {
+      const m = String(html).match(re);
+      if (m?.[1]) {
+        videoId = m[1];
+        break;
+      }
+    }
+
+    const streamUrl = isLive && videoId
+      ? `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`
+      : (isLive
+        ? `https://www.youtube.com/embed/live_stream?channel=${YOUTUBE_CHANNEL_ID}&autoplay=1&mute=0`
+        : '');
+
+    const shouldUpdate =
+      Boolean(current?.isLive) !== Boolean(isLive) ||
+      (isLive && videoId && current?.liveVideoId !== videoId) ||
+      (isLive && !current?.streamUrl);
+
+    if (shouldUpdate) {
+      setSettingJson('live', {
+        streamUrl,
+        liveVerseText: current?.liveVerseText || `"${DEFAULT_VERSE.texte}" — ${DEFAULT_VERSE.ref}`,
+        liveVideoId: videoId || current?.liveVideoId || '',
+        isLive: Boolean(isLive),
+      });
+    }
+  } catch {
+    // ignore: scraping ne doit pas casser le serveur
+  }
+}
+
+function startYouTubeLivePolling() {
+  if (ytLivePollTimer) return;
+  void pollYouTubeLiveOnce();
+  ytLivePollTimer = setInterval(() => {
+    void pollYouTubeLiveOnce();
+  }, YOUTUBE_LIVE_CHECK_INTERVAL_MS);
+}
+
 const app = express();
 const httpServer = http.createServer(app);
 const io = new SocketIO(httpServer, { cors: { origin: false } });
 const PORT = Number(process.env.PORT || 5500);
-const SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32).toString('hex');
+const SESSION_SECRET = process.env.SESSION_SECRET
+  ? (process.env.SESSION_SECRET.length < 32
+    ? (console.warn('[FOI SAINTE] ⚠ SESSION_SECRET trop court — utilisation d\'un secret aléatoire'), crypto.randomBytes(32).toString('hex'))
+    : process.env.SESSION_SECRET)
+  : crypto.randomBytes(32).toString('hex');
 const IS_PROD = process.env.NODE_ENV === 'production';
 const TRUST_PROXY = Number(process.env.TRUST_PROXY || 0);
 
@@ -46,7 +146,7 @@ const DEFAULT_DONATIONS = {
   currency: 'XOF',
   orangeMoneyNumber: '07 89 36 21 85',
   orangeMoneyName: 'EGLISE FOI SAINTE',
-  waveNumber: '07 57 55 86 03',
+  waveNumber: '07 89 36 21 85',
   mtnNumber: '05 04 00 86 26',
   paypalUrl: 'https://www.paypal.com/donate?business=VOTRE_EMAIL_PAYPAL',
   cinetpayUrl: '',
@@ -81,6 +181,14 @@ function initDb() {
     db.exec("ALTER TABLE admins ADD COLUMN username TEXT NOT NULL DEFAULT 'admin'");
   }
 
+  // Migration : ajouter la colonne year aux replays si elle n'existe pas
+  const replayCols = db.prepare("PRAGMA table_info(replays)").all().map(c => c.name);
+  if (!replayCols.includes('year')) {
+    db.exec("ALTER TABLE replays ADD COLUMN year INTEGER NOT NULL DEFAULT 0");
+    // Mettre à jour les replays existants avec l'année extraite de la date
+    db.exec("UPDATE replays SET year = CAST(SUBSTR(date_text, -4) AS INTEGER) WHERE year = 0 AND LENGTH(date_text) >= 4");
+  }
+
   db.exec(`
       CREATE TABLE IF NOT EXISTS settings (
       key TEXT PRIMARY KEY,
@@ -92,6 +200,7 @@ function initDb() {
       yt_id TEXT NOT NULL,
       title TEXT NOT NULL,
       date_text TEXT NOT NULL,
+      year INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL
     );
 
@@ -139,27 +248,94 @@ function initDb() {
       texte TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS pastor_columns (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      content TEXT NOT NULL,
+      author TEXT NOT NULL DEFAULT 'Pasteur',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS books (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      author TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      cover_url TEXT NOT NULL DEFAULT '',
+      pdf_url TEXT NOT NULL DEFAULT '',
+      category TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS webzine_articles (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      excerpt TEXT NOT NULL DEFAULT '',
+      content TEXT NOT NULL,
+      image_url TEXT NOT NULL DEFAULT '',
+      author TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS qa_questions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      question TEXT NOT NULL,
+      answer TEXT NOT NULL,
+      category TEXT NOT NULL DEFAULT 'General',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS academy_courses (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      video_url TEXT NOT NULL DEFAULT '',
+      lesson_number INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS slider_images (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      image_url TEXT NOT NULL,
+      title TEXT NOT NULL DEFAULT '',
+      subtitle TEXT NOT NULL DEFAULT '',
+      link TEXT NOT NULL DEFAULT '',
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS audio_sermons (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      speaker TEXT NOT NULL DEFAULT '',
+      description TEXT NOT NULL DEFAULT '',
+      audio_url TEXT NOT NULL,
+      date_text TEXT NOT NULL DEFAULT '',
+      duration TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL
+    );
   `);
 
   ensureSetting('verse', JSON.stringify(DEFAULT_VERSE));
-  ensureSetting('live', JSON.stringify({
-    streamUrl: '',
+  setSettingJson('live', {
+    streamUrl: `https://www.youtube.com/embed/-7MlvscREAM?autoplay=1&mute=0`,
     liveVerseText: `"${DEFAULT_VERSE.texte}" — ${DEFAULT_VERSE.ref}`,
-    liveVideoId: '',
+    liveVideoId: '-7MlvscREAM',
     isLive: false,
-  }));
+  });
   ensureSetting('donations', JSON.stringify(DEFAULT_DONATIONS));
   ensureSetting('eglise', JSON.stringify({
     nom: 'Église FOI SAINTE',
-    slogan: 'Édifiés sur la foi, marchant dans l’amour',
-    vision: 'Être une communauté de foi vivante, ancrée dans la Parole de Dieu, rayonnant l’amour du Christ dans toute la Côte d’Ivoire et au-delà.',
+    slogan: 'Édifiés sur la foi, marchant dans l\'amour',
+    vision: 'Être une communauté de foi vivante, ancrée dans la Parole de Dieu, rayonnant l\'amour du Christ dans toute la Côte d\'Ivoire et au-delà.',
     mission: 'Évangéliser, former des disciples, adorer Dieu en esprit et en vérité, et servir notre prochain avec amour et compassion.',
-    valeurs: 'Foi, Prière, Fraternité, Intégrité, Service. Nous croyons en la puissance transformatrice de l’Évangile de Jésus-Christ.',
-    histoire: 'L’Église FOI SAINTE a été fondée avec la conviction profonde que Dieu appelle son peuple à se bâtir sur une foi solide et inébranlable. Depuis notre création, nous avons grandi en nombre et en maturité spirituelle, portés par la grâce de Dieu et la fidélité de notre communauté.',
+    valeurs: 'Foi, Prière, Fraternité, Intégrité, Service. Nous croyons en la puissance transformatrice de l\'Évangile de Jésus-Christ.',
+    histoire: 'L\'Église FOI SAINTE a été fondée avec la conviction profonde que Dieu appelle son peuple à se bâtir sur une foi solide et inébranlable. Depuis notre création, nous avons grandi en nombre et en maturité spirituelle, portés par la grâce de Dieu et la fidélité de notre communauté.',
     horaireCulte: 'Dimanche — 10h00 à 13h00',
     horaireEtude: 'Mercredi — 19h00 à 20h30',
     horaireVeillee: 'Vendredi — 21h00 à 00h00',
-    adresse: 'Abidjan, Côte d’Ivoire',
+    adresse: 'Abidjan, Côte d\'Ivoire',
     contact: '+225 07 89 36 21 85',
     email: 'contact@foisainte.com',
     equipe: 'Pasteur | Pasteur Principal',
@@ -167,11 +343,13 @@ function initDb() {
 
   const replayCount = db.prepare('SELECT COUNT(*) AS c FROM replays').get().c;
   if (replayCount === 0) {
-    const insertReplay = db.prepare('INSERT INTO replays (yt_id, title, date_text, created_at) VALUES (?, ?, ?, ?)');
+    const insertReplay = db.prepare('INSERT INTO replays (yt_id, title, date_text, year, created_at) VALUES (?, ?, ?, ?, ?)');
     const now = new Date().toISOString();
     const transaction = db.transaction((rows) => {
       for (const row of rows) {
-        insertReplay.run(row.id, row.titre, row.date, now);
+        const yearMatch = row.date.match(/\d{4}/);
+        const year = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
+        insertReplay.run(row.id, row.titre, row.date, year, now);
       }
     });
     transaction(DEFAULT_REPLAYS);
@@ -285,9 +463,9 @@ function getAgenda() {
 
 function getReplays() {
   return db
-    .prepare('SELECT id, yt_id, title, date_text FROM replays ORDER BY id DESC')
+    .prepare('SELECT id, yt_id, title, date_text, year FROM replays ORDER BY id DESC')
     .all()
-    .map((r) => ({ dbId: r.id, id: r.yt_id, titre: r.title, date: r.date_text }));
+    .map((r) => ({ dbId: r.id, id: r.yt_id, titre: r.title, date: r.date_text, year: r.year }));
 }
 
 function getSharedPrayers() {
@@ -410,10 +588,18 @@ io.on('connection', (socket) => {
   });
 });
 
+// Gestionnaire global pour les rejets de promesses non rattrapés
+process.on('unhandledRejection', (reason) => {
+  console.error('[FOI SAINTE] Unhandled Rejection:', reason instanceof Error ? reason.message : reason);
+});
+
 initDb();
 initVapid();
 scheduleCron();
-createDefaultAdmin();
+createDefaultAdmin().catch((err) => {
+  console.error('[FOI SAINTE] Erreur création admin:', err.message);
+});
+startYouTubeLivePolling();
 
 if (TRUST_PROXY > 0) {
   app.set('trust proxy', TRUST_PROXY);
@@ -461,6 +647,7 @@ app.get('/api/public/content', (req, res) => {
     temoignages: getTemoignages(),
     agenda: getAgenda(),
     eglise: getSettingJson('eglise', {}),
+    audio: getAudioSermons(),
   });
 });
 
@@ -593,6 +780,7 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
     temoignages: getTemoignages(),
     agenda: getAgenda(),
     eglise: getSettingJson('eglise', {}),
+    audio: getAudioSermons(),
     stats: buildStats(todayKey()),
   });
 });
@@ -632,8 +820,11 @@ app.post('/api/admin/replays', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'INVALID_PAYLOAD' });
   }
 
-  db.prepare('INSERT INTO replays (yt_id, title, date_text, created_at) VALUES (?, ?, ?, ?)')
-    .run(id.slice(0, 80), titre.slice(0, 200), date.slice(0, 120), new Date().toISOString());
+  const yearMatch = date.match(/\d{4}/);
+  const year = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
+
+  db.prepare('INSERT INTO replays (yt_id, title, date_text, year, created_at) VALUES (?, ?, ?, ?, ?)')
+    .run(id.slice(0, 80), titre.slice(0, 200), date.slice(0, 120), year, new Date().toISOString());
   res.json({ ok: true });
 });
 
@@ -650,8 +841,11 @@ app.put('/api/admin/replays/:replayId', requireAdmin, (req, res) => {
     return res.status(400).json({ error: 'INVALID_PAYLOAD' });
   }
 
-  db.prepare('UPDATE replays SET yt_id = ?, title = ?, date_text = ? WHERE id = ?')
-    .run(yt_id.slice(0, 80), titre.slice(0, 200), date.slice(0, 120), replayId);
+  const yearMatch = date.match(/\d{4}/);
+  const year = yearMatch ? parseInt(yearMatch[0]) : new Date().getFullYear();
+
+  db.prepare('UPDATE replays SET yt_id = ?, title = ?, date_text = ?, year = ? WHERE id = ?')
+    .run(yt_id.slice(0, 80), titre.slice(0, 200), date.slice(0, 120), year, replayId);
   res.json({ ok: true });
 });
 
@@ -830,6 +1024,86 @@ app.get('/api/admin/push/stats', requireAdmin, (req, res) => {
   const total = db.prepare('SELECT COUNT(*) AS c FROM push_subscriptions').get().c;
   const actif = db.prepare('SELECT COUNT(*) AS c FROM push_subscriptions WHERE actif = 1').get().c;
   res.json({ total, actif });
+});
+
+// ─── AUDIO SERMONS ───────────────────────────────────────────────────────────
+
+app.get('/api/public/audio', (req, res) => {
+  const sermons = db.prepare('SELECT id, title, speaker, description, audio_url, date_text, duration FROM audio_sermons ORDER BY id DESC').all();
+  res.json(sermons);
+});
+
+function getAudioSermons() {
+  return db.prepare('SELECT id, title, speaker, description, audio_url, date_text, duration FROM audio_sermons ORDER BY id DESC').all();
+}
+
+app.post('/api/admin/audio', requireAdmin, (req, res) => {
+  const title = String(req.body?.title || '').trim();
+  const speaker = String(req.body?.speaker || '').trim();
+  const description = String(req.body?.description || '').trim();
+  const audio_url = String(req.body?.audio_url || '').trim();
+  const date_text = String(req.body?.date_text || '').trim();
+  const duration = String(req.body?.duration || '').trim();
+
+  if (!title || !audio_url) {
+    return res.status(400).json({ error: 'INVALID_PAYLOAD' });
+  }
+
+  db.prepare('INSERT INTO audio_sermons (title, speaker, description, audio_url, date_text, duration, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+    .run(title.slice(0, 200), speaker.slice(0, 100), description.slice(0, 500), audio_url.slice(0, 500), date_text.slice(0, 120), duration.slice(0, 20), new Date().toISOString());
+  res.json({ ok: true });
+});
+
+app.put('/api/admin/audio/:id', requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  const title = String(req.body?.title || '').trim();
+  const speaker = String(req.body?.speaker || '').trim();
+  const description = String(req.body?.description || '').trim();
+  const audio_url = String(req.body?.audio_url || '').trim();
+  const date_text = String(req.body?.date_text || '').trim();
+  const duration = String(req.body?.duration || '').trim();
+
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'INVALID_ID' });
+  if (!title || !audio_url) return res.status(400).json({ error: 'INVALID_PAYLOAD' });
+
+  db.prepare('UPDATE audio_sermons SET title = ?, speaker = ?, description = ?, audio_url = ?, date_text = ?, duration = ? WHERE id = ?')
+    .run(title.slice(0, 200), speaker.slice(0, 100), description.slice(0, 500), audio_url.slice(0, 500), date_text.slice(0, 120), duration.slice(0, 20), id);
+  res.json({ ok: true });
+});
+
+app.delete('/api/admin/audio/:id', requireAdmin, (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'INVALID_ID' });
+  db.prepare('DELETE FROM audio_sermons WHERE id = ?').run(id);
+  res.json({ ok: true });
+});
+
+const audioUploadsDir = path.join(__dirname, 'uploads', 'audio');
+if (!fs.existsSync(audioUploadsDir)) fs.mkdirSync(audioUploadsDir, { recursive: true });
+
+const audioStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, audioUploadsDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '') || '.mp3';
+    cb(null, `sermon_${Date.now()}_${crypto.randomBytes(4).toString('hex')}${ext}`);
+  },
+});
+
+const uploadAudio = multer({
+  storage: audioStorage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^audio\/(mpeg|mp3|ogg|wav|aac|webm)$/.test(file.mimetype)) cb(null, true);
+    else cb(new Error('TYPE_AUDIO_INVALIDE'));
+  },
+});
+
+app.post('/api/admin/audio/upload', requireAdmin, (req, res) => {
+  uploadAudio.single('audio')(req, res, (err) => {
+    if (err) return res.status(400).json({ error: err.message || 'UPLOAD_FAILED' });
+    if (!req.file) return res.status(400).json({ error: 'NO_FILE' });
+    res.json({ ok: true, url: `/uploads/audio/${req.file.filename}` });
+  });
 });
 
 // ─── UPLOAD PHOTOS MEMBRES ───────────────────────────────────────────────────
