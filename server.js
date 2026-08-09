@@ -509,6 +509,20 @@ function buildStats(day) {
   };
 }
 
+function getDailyStats(days = 14) {
+  const rows = db.prepare('SELECT day, COUNT(*) AS visiteurs FROM stat_daily_visitors GROUP BY day').all();
+  const byDay = {};
+  for (const r of rows) byDay[r.day] = r.visiteurs;
+  const out = [];
+  const now = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - i));
+    const key = d.toISOString().slice(0, 10);
+    out.push({ date: key, visiteurs: byDay[key] || 0 });
+  }
+  return out;
+}
+
 function incrementStat(key, amount = 1) {
   db.prepare('UPDATE stat_totals SET value = value + ? WHERE key = ?').run(amount, key);
 }
@@ -637,7 +651,7 @@ app.use(helmet({
     useDefaults: false,
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.youtube.com', 'https://s.ytimg.com'],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.youtube.com', 'https://s.ytimg.com', 'https://cdnjs.cloudflare.com'],
       styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
       fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
       imgSrc: ["'self'", 'data:', 'blob:', 'https://img.youtube.com', 'https://i.ytimg.com', 'https://yt3.ggpht.com'],
@@ -830,7 +844,7 @@ app.get('/api/admin/dashboard', requireAdmin, (req, res) => {
     agenda: getAgenda(),
     eglise: getSettingJson('eglise', {}),
     audio: getAudioSermons(),
-    stats: buildStats(todayKey()),
+    stats: { ...buildStats(todayKey()), daily: getDailyStats(14) },
   });
 });
 

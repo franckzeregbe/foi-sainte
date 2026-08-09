@@ -2517,6 +2517,33 @@ nav {
 .stat-label { display: block; color: var(--text-secondary); font-size: 0.75rem; margin-bottom: 0.25rem; }
 .stat-item strong { color: var(--nav-bg); font-size: 1.2rem; font-family: var(--font-main); font-weight: 700; }
 
+.stats-chart-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  margin: 0.4rem 0 0.5rem;
+}
+
+.stats-chart-box {
+  position: relative;
+  height: 230px;
+  background: var(--blue-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.6rem;
+  margin-bottom: 0.8rem;
+}
+
+.stats-chart-empty {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-align: center;
+  margin: 2.5rem 0;
+}
+
 .agenda-admin-form { background: #f7fafc; border: 1px solid var(--border); border-radius: 10px; padding: 1rem; margin-bottom: 1rem; }
 .agenda-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin-bottom: 0.6rem; }
 .agenda-form-group { display: flex; flex-direction: column; gap: 0.25rem; }

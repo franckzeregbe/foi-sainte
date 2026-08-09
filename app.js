@@ -1342,6 +1342,76 @@ function updateStatsUi() {
   if (prayers) prayers.textContent = String(APP_STATE.stats.prayerRequests || 0);
 }
 
+let statsChart = null;
+
+function loadChartJs() {
+  if (window.Chart) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Chart.js indisponible'));
+    document.head.appendChild(s);
+  });
+}
+
+function renderStatsChart() {
+  const canvas = document.getElementById('stats-chart');
+  if (!canvas) return;
+  const daily = (APP_STATE.stats && APP_STATE.stats.daily) || [];
+
+  if (statsChart) {
+    statsChart.destroy();
+    statsChart = null;
+  }
+
+  loadChartJs()
+    .then(() => {
+      if (!daily.length) {
+        canvas.parentElement.innerHTML = '<p class="stats-chart-empty">Aucune donn\u00e9e de visite pour l\'instant.</p>';
+        return;
+      }
+      statsChart = new Chart(canvas.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: daily.map((d) => {
+            const p = d.date.split('-');
+            return p[2] + '/' + p[1];
+          }),
+          datasets: [{
+            label: 'Visiteurs uniques',
+            data: daily.map((d) => d.visiteurs),
+            borderColor: 'var(--nav-bg)',
+            backgroundColor: 'rgba(200, 169, 81, 0.25)',
+            fill: true,
+            tension: 0.35,
+            borderWidth: 2,
+            pointBackgroundColor: '#c8a951',
+            pointBorderColor: '#fff',
+            pointRadius: 3,
+            pointHoverRadius: 5,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0 },
+              grid: { color: 'rgba(30, 58, 95, 0.08)' },
+            },
+            x: { grid: { display: false } },
+          },
+        },
+      });
+    })
+    .catch(() => {
+      canvas.parentElement.innerHTML = '<p class="stats-chart-empty">Graphique indisponible (CDN injoignable).</p>';
+    });
+}
+
 async function initAdmin() {
   const input = document.getElementById('admin-pass');
   const userInput = document.getElementById('admin-user');
@@ -1564,6 +1634,11 @@ function showAdminPanel(panelId, btnEl) {
   const sidebar = document.getElementById('admin-sidebar');
   if (sidebar && window.innerWidth < 900) {
     sidebar.classList.remove('open');
+  }
+
+  // Graphique des stats : rendu au moment où le panneau devient visible
+  if (panelId === 'stats') {
+    renderStatsChart();
   }
 }
 
