@@ -2,9 +2,18 @@
    EGLISE FOI SAINTE - Frontend connecte au backend securise
 */
 
-let socket = null;
-let pushSubscription = null;
-const PUSH_STORAGE_KEY = 'foisainte_push_subscribed';
+// Les messages sont definis ci-dessous (tableau local de secours).
+// On tente ensuite de charger messages.json (source de verite) pour le remplacer.
+function initMessages() {
+  fetch('/messages.json')
+    .then(r => r.json())
+    .then(data => {
+      if (data && Array.isArray(data.messages) && data.messages.length) {
+        MESSAGES_DU_JOUR = data.messages;
+      }
+    })
+    .catch(() => { /* on conserve le tableau local */ });
+}
 
 // ─── UI ENHANCEMENTS ─────────────────────────────────────────
 
@@ -37,31 +46,11 @@ function hidePageLoader() {
   }
 }
 
-// Hero particles
-function createHeroParticles() {
-  const container = document.getElementById('hero-particles');
-  if (!container) return;
-
-  const count = window.innerWidth < 768 ? 12 : 25;
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.bottom = -(Math.random() * 100) + 'px';
-    p.style.width = (Math.random() * 3 + 1.5) + 'px';
-    p.style.height = p.style.width;
-    p.style.animationDuration = (Math.random() * 12 + 8) + 's';
-    p.style.animationDelay = (Math.random() * 10) + 's';
-    p.style.opacity = '0';
-    container.appendChild(p);
-  }
-}
-
 // Scroll animations with IntersectionObserver
 function initScrollAnimations() {
   // Auto-wrap grid/section children in fade-up elements
   const animTargets = [
-    '.agenda-grid', '.replay-grid', '.priere-grid', '.don-grid',
+    '.replay-grid', '.priere-grid', '.don-grid',
     '.eglise-infos-grid', '.eglise-vm-grid', '.eglise-equipe-grid',
     '.eglise-nav-cards', '.intentions-list', '.confessions-grid',
   ];
@@ -172,7 +161,7 @@ function showSection(id, linkEl) {
   history.replaceState(null, '', '#' + id);
 }
 
-const MESSAGES_DU_JOUR = [
+let MESSAGES_DU_JOUR = [
   // INSPIRATION
   { type:'inspiration', texte:"Jésus a dit : Je suis la lumière du monde. Celui qui me suit ne marchera pas dans les ténèbres, mais il aura la lumière de la vie.", ref:'Jean 8:12' },
   { type:'inspiration', texte:"En Jésus-Christ, vous êtes une nouvelle créature. Les choses anciennes sont passées, voici, toutes choses sont devenues nouvelles.", ref:'2 Corinthiens 5:17' },
@@ -256,6 +245,9 @@ const TYPE_CONFIG = {
 };
 
 function getDailyMessage() {
+  if (!MESSAGES_DU_JOUR.length) {
+    return { type: 'inspiration', texte: "Que la grace de Dieu soit avec vous.", ref: 'Amos 5:24' };
+  }
   const dayOfYear = Math.floor((Date.now() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
   return MESSAGES_DU_JOUR[dayOfYear % MESSAGES_DU_JOUR.length];
 }
@@ -319,15 +311,19 @@ const APP_STATE = {
 };
 
 let chatOpen = true;
-let chatMessages = [];
+let socket = null;
+const chatMessages = [];
 const VISITOR_STORAGE_KEY = 'foisainte_visitor_id';
 const CHAT_NAME_KEY = 'foisainte_chat_name';
+const PUSH_STORAGE_KEY = 'foisainte_push_subscribed';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // UI Enhancements
   createBgParticles();
   initScrollTopBtn();
   initHeaderScroll();
+  initTheme();
+  initMessages();
 
   initAgenda();
   initHomeClock();
@@ -466,31 +462,6 @@ function initAgenda() {
   renderProgrammeWeekly(APP_STATE.agenda);
 }
 
-function renderAgenda(items) {
-  const grid = document.getElementById('agenda-grid');
-  if (!grid) return;
-
-  const typeMap = (type) => {
-    const t = type.toLowerCase();
-    if (t.includes('culte')) return 'culte';
-    if (t.includes('étude') || t.includes('etude') || t.includes('biblique')) return 'etude';
-    if (t.includes('veillée') || t.includes('veillee') || t.includes('prière') || t.includes('priere')) return 'veillee';
-    return 'culte';
-  };
-
-  grid.innerHTML = items.map((ev) => `
-    <div class="agenda-card" data-type="${typeMap(ev.type)}">
-      <div class="agenda-date">${escapeHtml(ev.date_text)}</div>
-      <div class="agenda-type">${escapeHtml(ev.type)}</div>
-      <div class="agenda-titre">${escapeHtml(ev.titre)}</div>
-      <div class="agenda-heure"><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.heure)}</div>
-    </div>
-  `).join('');
-
-  // Render weekly program on homepage
-  renderProgrammeWeekly(items);
-}
-
 function renderProgrammeWeekly(items) {
   const list = document.getElementById('programme-weekly-list');
   if (!list) return;
@@ -517,18 +488,37 @@ function renderProgrammeWeekly(items) {
   const today = new Date().getDay(); // 0=Dimanche
   const todayName = joursOrdre[today];
 
+  const pgConfig = (type, titre) => {
+    const t = ((type || '') + ' ' + (titre || '')).toLowerCase();
+    if (t.includes('culte'))    return { icon: 'fa-church',        color: '#c8a951' };
+    if (t.includes('biblique') || t.includes('étud') || t.includes('etud')) return { icon: 'fa-book-bible', color: '#4f8fd6' };
+    if (t.includes('prière') || t.includes('priere') || t.includes('veill')) return { icon: 'fa-hands-praying', color: '#9b59b6' };
+    if (t.includes('louange'))  return { icon: 'fa-music',         color: '#1abc9c' };
+    return { icon: 'fa-calendar-days', color: '#7a8ba0' };
+  };
+
   list.innerHTML = sorted.map((ev) => {
     const jourNom = joursOrdre.find(j => ev.date_text.includes(j)) || ev.date_text;
     const isToday = ev.date_text.includes(todayName);
+    const cfg = pgConfig(ev.type, ev.titre);
     const onclickAttr = getProgrammeOnClick(ev);
     return `
     <div class="programme-item${isToday ? ' highlight' : ''}" ${onclickAttr}>
-      <div class="programme-jour">${escapeHtml(jourNom)}</div>
-      <div class="programme-type">
-        <strong>${escapeHtml(ev.titre)}</strong>
-        <span>${escapeHtml(ev.type)}</span>
+      <div class="programme-badge" style="background:${cfg.color}1f;color:${cfg.color};border-color:${cfg.color}3d">
+        <i class="fa-solid ${cfg.icon}"></i>
       </div>
-      <div class="programme-heure"><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.heure)}</div>
+      <div class="programme-body">
+        <div class="programme-title-row">
+          <strong class="programme-titre">${escapeHtml(ev.titre)}</strong>
+          ${isToday ? '<span class="programme-today-pill"><i class="fa-solid fa-circle-dot"></i> Aujourd\'hui</span>' : ''}
+        </div>
+        <div class="programme-meta">
+          <span class="programme-jour">${escapeHtml(jourNom)}</span>
+          <span class="programme-type">${escapeHtml(ev.type)}</span>
+        </div>
+      </div>
+      <div class="programme-time"><i class="fa-regular fa-clock"></i> ${escapeHtml(ev.heure)}</div>
+      <i class="fa-solid fa-chevron-right programme-arrow"></i>
     </div>`;
   }).join('');
 }
@@ -585,15 +575,6 @@ function applyPublicContentToUI() {
 
   // Dashboard: message du jour — maintenant dans le hero
   // (les éléments verset-texte et verset-ref sont utilisés directement)
-
-  // Dashboard: KPI cultes
-  const kpiCultes = document.getElementById('kpi-cultes');
-  if (kpiCultes && APP_STATE.agenda) {
-    const culteCount = APP_STATE.agenda.filter(e =>
-      e.type && e.type.toLowerCase().includes('culte')
-    ).length;
-    kpiCultes.textContent = culteCount || '0';
-  }
 
   if (liveDebugSrc) liveDebugSrc.textContent = String(APP_STATE.live?.streamUrl || '');
   if (frame && APP_STATE.live.streamUrl) frame.src = withYouTubeOriginParam(APP_STATE.live.streamUrl);
@@ -800,7 +781,7 @@ function renderReplays() {
   // Extraire les années uniques des replays
   const years = new Set();
   APP_STATE.replays.forEach(r => {
-    const yearMatch = r.date.match(/\d{4}/);
+    const yearMatch = (r.date || '').match(/\d{4}/);
     if (yearMatch) years.add(yearMatch[0]);
   });
 
@@ -819,7 +800,7 @@ function renderReplays() {
   // Filtrer les replays par année
   let filteredReplays = APP_STATE.replays;
   if (currentYearFilter !== 'all') {
-    filteredReplays = APP_STATE.replays.filter(r => r.date.includes(currentYearFilter));
+    filteredReplays = APP_STATE.replays.filter(r => (r.date || '').includes(currentYearFilter));
   }
 
   if (filteredReplays.length === 0) {
@@ -873,7 +854,7 @@ function initLiveChat() {
   });
 
   socket.on('chat:history', (messages) => {
-    chatMessages = [];
+    chatMessages.length = 0;
     const container = document.getElementById('chat-messages');
     if (container) container.innerHTML = '';
     messages.forEach((msg) => renderChatMessage(msg));
@@ -961,7 +942,6 @@ function checkLiveStatus() {
   const notif = document.getElementById('notif-bar');
   const notifText = document.getElementById('notif-text');
   const viewers = document.getElementById('viewers-count');
-  const liveSubtitle = document.getElementById('live-preview-subtitle');
 
   if (viewers) viewers.textContent = String(APP_STATE.stats.uniqueVisitorsToday || 0);
 
@@ -971,23 +951,9 @@ function checkLiveStatus() {
       notifText.textContent = 'Le culte est en cours EN DIRECT - Rejoignez-nous maintenant !';
       notif.style.display = 'flex';
     }
-    // KPI live status
-    const kpiLive = document.getElementById('kpi-live');
-    if (kpiLive) { kpiLive.textContent = 'En direct'; kpiLive.style.color = 'var(--green)'; }
-    // Live preview banner
-    if (liveSubtitle) {
-      liveSubtitle.textContent = APP_STATE.stats.uniqueVisitorsToday + ' en ligne — Cliquez pour rejoindre';
-    }
   } else {
     if (badge) badge.style.display = 'none';
     if (notif) notif.style.display = 'none';
-    // KPI live status
-    const kpiLive = document.getElementById('kpi-live');
-    if (kpiLive) { kpiLive.textContent = 'Non'; kpiLive.style.color = 'var(--text-secondary)'; }
-    // Live preview banner
-    if (liveSubtitle) {
-      liveSubtitle.textContent = 'Prochain culte — Cliquez pour voir les replays';
-    }
   }
 }
 
@@ -1042,8 +1008,26 @@ function renderTemoignages() {
       <div class="intention-name"><i class="fa-solid fa-star" style="color:#f39c12"></i> ${escapeHtml(t.name)} :</div>
       <div class="temoignage-titre">${escapeHtml(t.titre)}</div>
       <div class="intention-text">${escapeHtml(t.texte)}</div>
+      <div class="temoignage-actions" style="margin-top:0.5rem;text-align:right">
+        <button class="btn-like" data-id="${t.id}" onclick="likeTemoignage(${t.id}, this)" style="background:none;border:none;color:#e53e3e;cursor:pointer;font-size:0.9rem;display:flex;align-items:center;gap:0.3rem;margin-left:auto">
+          <i class="fa-solid fa-heart"></i>
+          <span class="like-count">${t.likes || 0}</span>
+        </button>
+      </div>
     </div>
   `).join('');
+}
+
+async function likeTemoignage(id, btn) {
+  try {
+    const data = await api(`/api/public/temoignages/${id}/like`, { method: 'POST' });
+    const countEl = btn.querySelector('.like-count');
+    if (countEl) countEl.textContent = data.likes;
+    btn.style.color = '#dc2626';
+    showToast('Merci pour votre encouragement !');
+  } catch {
+    showToast('Impossible d\'ajouter le like.');
+  }
 }
 
 async function submitPriere(e) {
@@ -1293,14 +1277,6 @@ function startLiveAutoRefresh() {
       // Mettre à jour l'iframe si l'URL a changé (en ajoutant origin si nécessaire)
       if (frame && nextLive.streamUrl) {
         const nextSrc = withYouTubeOriginParam(nextLive.streamUrl);
-        // Diagnostic mobile/PC : voir quelle URL on injecte réellement dans l'iframe
-        try {
-          console.log('[live:refresh]', {
-            nextLiveStreamUrl: nextLive.streamUrl,
-            nextSrc,
-            beforeFrameSrc: frame.src,
-          });
-        } catch {}
         if (frame.src !== nextSrc) frame.src = nextSrc;
       }
 
@@ -1328,12 +1304,6 @@ function updateStatsUi() {
   if (uniqueDay) uniqueDay.textContent = String(APP_STATE.stats.uniqueVisitorsToday || 0);
   if (chat) chat.textContent = String(APP_STATE.stats.chatMessages || 0);
   if (prayers) prayers.textContent = String(APP_STATE.stats.prayerRequests || 0);
-
-  // Dashboard KPI cards
-  const kpiVisiteurs = document.getElementById('kpi-visiteurs');
-  const kpiPrieres = document.getElementById('kpi-prieres');
-  if (kpiVisiteurs) kpiVisiteurs.textContent = String(APP_STATE.stats.uniqueVisitorsToday || 0);
-  if (kpiPrieres) kpiPrieres.textContent = String(APP_STATE.stats.prayerRequests || 0);
 }
 
 async function initAdmin() {
@@ -2325,7 +2295,6 @@ async function requestPushPermission() {
       userVisibleOnly: true,
       applicationServerKey: urlBase64ToUint8Array(publicKey),
     });
-    pushSubscription = sub;
     await api('/api/public/push/subscribe', {
       method: 'POST',
       body: JSON.stringify(sub.toJSON()),
@@ -2580,4 +2549,22 @@ function escapeHtml(text) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+// ─── DARK THEME TOGGLE ───────────────────────────────────────────
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  const icon = document.querySelector('#theme-toggle i');
+  if (icon) icon.className = next === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+}
+
+function initTheme() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
 }

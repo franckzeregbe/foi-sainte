@@ -37,6 +37,9 @@
       <a href="mailto:contact@foisainte.com" class="topbar-link"><i class="fa-solid fa-envelope"></i> contact@foisainte.com</a>
     </div>
     <div class="topbar-right">
+      <button id="theme-toggle" class="topbar-social" title="Thème sombre" onclick="toggleTheme()">
+        <i class="fa-solid fa-moon"></i>
+      </button>
       <a href="https://www.youtube.com/channel/UCleCSmPU4mCUJiVuS7SXEdA" target="_blank" class="topbar-social" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
       <a href="https://www.facebook.com/EgliseFOISAINTE/" target="_blank" class="topbar-social" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
       <a href="https://www.instagram.com/eglisefoisainte/" target="_blank" class="topbar-social" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
@@ -202,6 +205,7 @@
     <div class="hero-verse">
       <div class="hero-verse-top">
         <span class="hero-verse-tag"><i class="fa-solid fa-book-bible"></i> Message du jour</span>
+        <span id="message-type-label" class="hero-verse-type"></span>
         <span class="hero-clock" id="hero-clock"></span>
       </div>
       <blockquote id="verset-texte-hero" class="hero-verse-text"></blockquote>
@@ -236,29 +240,66 @@
     <div class="home-card home-card--programme">
       <div class="home-card-header">
         <div class="home-card-icon"><i class="fa-solid fa-calendar-week"></i></div>
-        <h3>Programme de la Semaine</h3>
+        <h3>Programme de la Semaine <span class="home-card-sub">Cultes &amp; r&eacute;unions</span></h3>
       </div>
       <div class="home-card-body">
         <div class="programme-list" id="programme-weekly-list">
           <div class="programme-item highlight">
-            <div class="programme-jour">Dimanche</div>
-            <div class="programme-type"><strong>Culte Dominical</strong><span>Culte</span></div>
-            <div class="programme-heure"><i class="fa-regular fa-clock"></i> 10h00</div>
+            <div class="programme-badge" style="background:#c8a9511f;color:#c8a951;border-color:#c8a9513d"><i class="fa-solid fa-church"></i></div>
+            <div class="programme-body">
+              <div class="programme-title-row">
+                <strong class="programme-titre">Culte Dominical</strong>
+                <span class="programme-today-pill"><i class="fa-solid fa-circle-dot"></i> Aujourd'hui</span>
+              </div>
+              <div class="programme-meta">
+                <span class="programme-jour">Dimanche</span>
+                <span class="programme-type">Culte</span>
+              </div>
+            </div>
+            <div class="programme-time"><i class="fa-regular fa-clock"></i> 10h00</div>
+            <i class="fa-solid fa-chevron-right programme-arrow"></i>
           </div>
           <div class="programme-item">
-            <div class="programme-jour">Mercredi</div>
-            <div class="programme-type"><strong>Étude de la Parole</strong><span>Étude Biblique</span></div>
-            <div class="programme-heure"><i class="fa-regular fa-clock"></i> 19h00</div>
+            <div class="programme-badge" style="background:#4f8fd61f;color:#4f8fd6;border-color:#4f8fd63d"><i class="fa-solid fa-book-bible"></i></div>
+            <div class="programme-body">
+              <div class="programme-title-row">
+                <strong class="programme-titre">Étude de la Parole</strong>
+              </div>
+              <div class="programme-meta">
+                <span class="programme-jour">Mercredi</span>
+                <span class="programme-type">Étude Biblique</span>
+              </div>
+            </div>
+            <div class="programme-time"><i class="fa-regular fa-clock"></i> 19h00</div>
+            <i class="fa-solid fa-chevron-right programme-arrow"></i>
           </div>
           <div class="programme-item">
-            <div class="programme-jour">Vendredi</div>
-            <div class="programme-type"><strong>Soirée de Prière</strong><span>Prière</span></div>
-            <div class="programme-heure"><i class="fa-regular fa-clock"></i> 19h30</div>
+            <div class="programme-badge" style="background:#9b59b61f;color:#9b59b6;border-color:#9b59b63d"><i class="fa-solid fa-hands-praying"></i></div>
+            <div class="programme-body">
+              <div class="programme-title-row">
+                <strong class="programme-titre">Soirée de Prière</strong>
+              </div>
+              <div class="programme-meta">
+                <span class="programme-jour">Vendredi</span>
+                <span class="programme-type">Pri&egrave;re</span>
+              </div>
+            </div>
+            <div class="programme-time"><i class="fa-regular fa-clock"></i> 19h30</div>
+            <i class="fa-solid fa-chevron-right programme-arrow"></i>
           </div>
           <div class="programme-item">
-            <div class="programme-jour">Samedi</div>
-            <div class="programme-type"><strong>Répétition Louange</strong><span>Louange</span></div>
-            <div class="programme-heure"><i class="fa-regular fa-clock"></i> 16h00</div>
+            <div class="programme-badge" style="background:#1abc9c1f;color:#1abc9c;border-color:#1abc9c3d"><i class="fa-solid fa-music"></i></div>
+            <div class="programme-body">
+              <div class="programme-title-row">
+                <strong class="programme-titre">Répétition Louange</strong>
+              </div>
+              <div class="programme-meta">
+                <span class="programme-jour">Samedi</span>
+                <span class="programme-type">Louange</span>
+              </div>
+            </div>
+            <div class="programme-time"><i class="fa-regular fa-clock"></i> 16h00</div>
+            <i class="fa-solid fa-chevron-right programme-arrow"></i>
           </div>
         </div>
       </div>
@@ -484,6 +525,10 @@
   <div class="container">
     <div class="live-header">
       <h2 class="page-header-title"><span class="dot-live"></span> CULTE EN DIRECT</h2>
+      <div class="live-header-meta">
+        <span id="live-badge" class="live-badge" style="display:none"><i class="fa-solid fa-circle-dot blink"></i> EN DIRECT</span>
+        <span id="viewers-count" class="live-viewers">0 en ligne</span>
+      </div>
     </div>
     <div class="flame-watermark live-flame" aria-hidden="true"></div>
 
@@ -1290,6 +1335,6 @@
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="app.js?v=5"></script>
+  <script src="app.js?v=6"></script>
 </body>
 </html>

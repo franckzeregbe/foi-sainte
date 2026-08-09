@@ -1,5 +1,5 @@
 /* Service Worker — Église FOI SAINTE */
-const CACHE_NAME = 'foisainte-v2';
+const CACHE_NAME = 'foisainte-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
@@ -13,14 +13,28 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-/* ─── Fetch: network-first for app files ────────────────────── */
+function shouldCache(url) {
+  if (url.origin !== self.location.origin) return false;
+  if (url.pathname.startsWith('/api/')) return false;
+  if (url.pathname.startsWith('/socket.io/')) return false;
+  return true;
+}
+
+/* ─── Fetch: network-first for app files, cache runtime ────── */
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
-  if (url.origin === self.location.origin) {
-    event.respondWith(
-      fetch(event.request).catch(() => caches.match(event.request))
-    );
-  }
+  if (url.origin !== self.location.origin) return;
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    fetch(event.request).then((response) => {
+      if (response.ok && shouldCache(url)) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+      }
+      return response;
+    }).catch(() => caches.match(event.request))
+  );
 });
 
 /* ─── Web Push ─────────────────────────────────────────────── */

@@ -131,9 +131,7 @@ const DEFAULT_VERSE = {
 };
 
 const DEFAULT_REPLAYS = [
-  { id: 'dQw4w9WgXcQ', titre: 'Culte du 20 avril 2026 - La Grace de Dieu', date: '20 avril 2026' },
-  { id: 'dQw4w9WgXcQ', titre: 'Culte du 13 avril 2026 - Foi et Perseverance', date: '13 avril 2026' },
-  { id: 'dQw4w9WgXcQ', titre: 'Culte du 6 avril 2026 - Le Seigneur est ma Force', date: '6 avril 2026' },
+  { id: '9Ld1bOrOBKo', titre: 'Bienvenue sur la chaîne officielle | Église FOI SAINTE', date: '28 avril 2026' },
 ];
 
 const DEFAULT_PRAYERS = [
@@ -179,14 +177,6 @@ function initDb() {
   const cols = db.prepare("PRAGMA table_info(admins)").all().map(c => c.name);
   if (!cols.includes('username')) {
     db.exec("ALTER TABLE admins ADD COLUMN username TEXT NOT NULL DEFAULT 'admin'");
-  }
-
-  // Migration : ajouter la colonne year aux replays si elle n'existe pas
-  const replayCols = db.prepare("PRAGMA table_info(replays)").all().map(c => c.name);
-  if (!replayCols.includes('year')) {
-    db.exec("ALTER TABLE replays ADD COLUMN year INTEGER NOT NULL DEFAULT 0");
-    // Mettre à jour les replays existants avec l'année extraite de la date
-    db.exec("UPDATE replays SET year = CAST(SUBSTR(date_text, -4) AS INTEGER) WHERE year = 0 AND LENGTH(date_text) >= 4");
   }
 
   db.exec(`
@@ -246,6 +236,7 @@ function initDb() {
       name TEXT NOT NULL,
       titre TEXT NOT NULL,
       texte TEXT NOT NULL,
+      likes INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL
     );
 
@@ -317,13 +308,29 @@ function initDb() {
     );
   `);
 
+  // Migrations : colonnes manquantes sur les tables existantes
+  // (ALTER TABLE est requis car CREATE TABLE IF NOT EXISTS n'ajoute pas de colonne)
+  const replayCols = db.prepare("PRAGMA table_info(replays)").all().map(c => c.name);
+  if (!replayCols.includes('year')) {
+    db.exec("ALTER TABLE replays ADD COLUMN year INTEGER NOT NULL DEFAULT 0");
+    // Mettre à jour les replays existants avec l'année extraite de la date
+    db.exec("UPDATE replays SET year = CAST(SUBSTR(date_text, -4) AS INTEGER) WHERE year = 0 AND LENGTH(date_text) >= 4");
+  }
+
+  const temoignageCols = db.prepare("PRAGMA table_info(temoignages)").all().map(c => c.name);
+  if (!temoignageCols.includes('likes')) {
+    db.exec("ALTER TABLE temoignages ADD COLUMN likes INTEGER NOT NULL DEFAULT 0");
+  }
+
   ensureSetting('verse', JSON.stringify(DEFAULT_VERSE));
-  setSettingJson('live', {
+  // IMPORTANT : ensureSetting (INSERT OR IGNORE) — ne pas écraser la config live
+  // de l'admin à chaque démarrage du serveur.
+  ensureSetting('live', JSON.stringify({
     streamUrl: `https://www.youtube.com/embed/-7MlvscREAM?autoplay=1&mute=0`,
     liveVerseText: `"${DEFAULT_VERSE.texte}" — ${DEFAULT_VERSE.ref}`,
     liveVideoId: '-7MlvscREAM',
     isLive: false,
-  });
+  }));
   ensureSetting('donations', JSON.stringify(DEFAULT_DONATIONS));
   ensureSetting('eglise', JSON.stringify({
     nom: 'Église FOI SAINTE',
@@ -454,7 +461,7 @@ function getDonationsConfig() {
 }
 
 function getTemoignages() {
-  return db.prepare('SELECT id, name, titre, texte FROM temoignages ORDER BY id DESC').all();
+  return db.prepare('SELECT id, name, titre, texte, likes FROM temoignages ORDER BY id DESC').all();
 }
 
 function getAgenda() {
@@ -912,6 +919,14 @@ app.delete('/api/admin/temoignages/:id', requireAdmin, (req, res) => {
   if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'INVALID_ID' });
   db.prepare('DELETE FROM temoignages WHERE id = ?').run(id);
   res.json({ ok: true });
+});
+
+app.post('/api/public/temoignages/:id/like', (req, res) => {
+  const id = Number(req.params.id);
+  if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'INVALID_ID' });
+  const result = db.prepare('UPDATE temoignages SET likes = likes + 1 WHERE id = ? RETURNING likes').get(id);
+  if (!result) return res.status(404).json({ error: 'NOT_FOUND' });
+  res.json({ ok: true, likes: result.likes });
 });
 
 app.delete('/api/admin/prayers/:id', requireAdmin, (req, res) => {
