@@ -114,12 +114,18 @@ const app = express();
 const httpServer = http.createServer(app);
 const io = new SocketIO(httpServer, { cors: { origin: false } });
 const PORT = Number(process.env.PORT || 5500);
-const SESSION_SECRET = process.env.SESSION_SECRET
-  ? (process.env.SESSION_SECRET.length < 32
-    ? (console.warn('[FOI SAINTE] ⚠ SESSION_SECRET trop court — utilisation d\'un secret aléatoire'), crypto.randomBytes(32).toString('hex'))
-    : process.env.SESSION_SECRET)
-  : crypto.randomBytes(32).toString('hex');
 const IS_PROD = process.env.NODE_ENV === 'production';
+const SESSION_SECRET = (() => {
+  const s = (process.env.SESSION_SECRET || '').trim();
+  if (s.length >= 32) return s;
+  if (IS_PROD) {
+    console.error('[FOI SAINTE] ⛔ SESSION_SECRET manquant ou trop court (< 32 caractères) en production.');
+    console.error('[FOI SAINTE] Génerez une longue clé aléatoire (ex: openssl rand -hex 32), placez-la dans .env, puis redémarrez.');
+    process.exit(1);
+  }
+  console.warn('[FOI SAINTE] ⚠ SESSION_SECRET non défini ou trop court — secret aléatoire utilisé (les sessions seront perdues au redémarrage).');
+  return crypto.randomBytes(32).toString('hex');
+})();
 const TRUST_PROXY = Number(process.env.TRUST_PROXY || 0);
 
 const db = new Database(path.join(__dirname, 'foi_sainte.db'));
@@ -520,6 +526,20 @@ function needsSetup() {
   return row.c === 0;
 }
 
+let defaultPwdCache = null;
+
+function usesDefaultPassword() {
+  if (defaultPwdCache !== null) return defaultPwdCache;
+  const defaultPwd = (process.env.ADMIN_DEFAULT_PASSWORD || '').trim();
+  if (!defaultPwd) {
+    defaultPwdCache = false;
+    return false;
+  }
+  const admin = db.prepare('SELECT password_hash FROM admins LIMIT 1').get();
+  defaultPwdCache = admin ? bcrypt.compareSync(defaultPwd, admin.password_hash) : false;
+  return defaultPwdCache;
+}
+
 function requireAdmin(req, res, next) {
   if (!req.session.adminId) {
     return res.status(401).json({ error: 'AUTH_REQUIRED' });
@@ -613,7 +633,25 @@ if (TRUST_PROXY > 0) {
 }
 
 app.use(helmet({
-  contentSecurityPolicy: false,
+  contentSecurityPolicy: {
+    useDefaults: false,
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'", 'https://www.youtube.com', 'https://s.ytimg.com'],
+      styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://cdnjs.cloudflare.com'],
+      fontSrc: ["'self'", 'data:', 'https://fonts.gstatic.com', 'https://cdnjs.cloudflare.com'],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https://img.youtube.com', 'https://i.ytimg.com', 'https://yt3.ggpht.com'],
+      mediaSrc: ["'self'", 'blob:'],
+      frameSrc: ["'self'", 'https://www.youtube.com', 'https://www.youtube-nocookie.com'],
+      connectSrc: ["'self'"],
+      workerSrc: ["'self'"],
+      manifestSrc: ["'self'"],
+      objectSrc: ["'none'"],
+      baseUri: ["'self'"],
+      formAction: ["'self'"],
+      frameAncestors: ["'self'"],
+    },
+  },
   crossOriginResourcePolicy: false,
 }));
 app.use(express.json({ limit: '1mb' }));
@@ -698,6 +736,7 @@ app.get('/api/admin/status', (req, res) => {
   res.json({
     authenticated: Boolean(req.session.adminId),
     needsSetup: needsSetup(),
+    usesDefaultPassword: usesDefaultPassword(),
   });
 });
 
@@ -718,6 +757,7 @@ app.post('/api/admin/setup', authLimiter, async (req, res) => {
 
   const hash = await bcrypt.hash(password, 12);
   const result = db.prepare('INSERT INTO admins (username, password_hash, created_at) VALUES (?, ?, ?)').run(username, hash, new Date().toISOString());
+  defaultPwdCache = null;
   req.session.adminId = result.lastInsertRowid;
   res.json({ ok: true });
 });
@@ -736,8 +776,9 @@ app.post('/api/admin/login', authLimiter, async (req, res) => {
     return res.status(401).json({ error: 'INVALID_CREDENTIALS' });
   }
 
+  defaultPwdCache = null;
   req.session.adminId = admin.id;
-  res.json({ ok: true });
+  res.json({ ok: true, usesDefaultPassword: usesDefaultPassword() });
 });
 
 app.post('/api/admin/logout', (req, res) => {
@@ -771,6 +812,7 @@ app.post('/api/admin/change-password', requireAdmin, authLimiter, async (req, re
     db.prepare('UPDATE admins SET password_hash = ? WHERE id = ?').run(hash, admin.id);
   }
 
+  defaultPwdCache = null;
   req.session.destroy(() => {
     res.clearCookie('foi_admin_sid');
     res.json({ ok: true });

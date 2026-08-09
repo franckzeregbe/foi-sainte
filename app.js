@@ -1378,6 +1378,10 @@ async function refreshAdminStatus() {
   } catch {
     APP_STATE.adminStatus = { authenticated: false, needsSetup: true };
   }
+  const warn = document.getElementById('admin-login-warn');
+  if (warn) {
+    warn.style.display = APP_STATE.adminStatus.usesDefaultPassword ? 'flex' : 'none';
+  }
 }
 
 async function adminLogin() {
@@ -1401,7 +1405,7 @@ async function adminLogin() {
   try {
     await refreshAdminStatus();
     const endpoint = APP_STATE.adminStatus.needsSetup ? '/api/admin/setup' : '/api/admin/login';
-    await api(endpoint, {
+    const res = await api(endpoint, {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
@@ -1411,7 +1415,12 @@ async function adminLogin() {
     await refreshAdminStatus();
     openAdminDashboard();
     await loadAdminDashboard();
-    showToast('Connexion admin réussie.');
+    if (res && res.usesDefaultPassword) {
+      showToast('Mot de passe par défaut encore actif ! Changez-le dans « Changer les identifiants ».');
+      showAdminPanel('securite');
+    } else {
+      showToast('Connexion admin réussie.');
+    }
   } catch (err) {
     if (err.status === 429) {
       showToast('Trop de tentatives. Réessayez plus tard.');

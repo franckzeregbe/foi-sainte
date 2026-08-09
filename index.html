@@ -772,6 +772,10 @@
     <div id="admin-login-card" class="admin-login-card">
       <h3><i class="fa-solid fa-user-shield"></i> Accès privé</h3>
       <p>Entrez vos identifiants administrateur.</p>
+      <div id="admin-login-warn" class="admin-login-warn" style="display:none">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Le mot de passe par défaut est encore actif. Changez-le dans le panneau « Changer les identifiants ».
+      </div>
       <div class="admin-login-row">
         <input id="admin-user" type="text" placeholder="Identifiant" maxlength="40" autocomplete="username" />
         <input id="admin-pass" type="password" placeholder="Mot de passe" maxlength="100" autocomplete="current-password" />
