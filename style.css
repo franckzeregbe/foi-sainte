@@ -3695,6 +3695,90 @@ nav {
 .modal-icon.priere { background: var(--green-bg); color: var(--green); }
 .modal-icon.louange { background: #fef3c7; color: #d97706; }
 
+.modal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.9rem;
+}
+
+.modal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: var(--blue-bg);
+  border: 1px solid rgba(30, 58, 95, 0.1);
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+}
+
+.modal-badge i { font-size: 0.7rem; color: var(--purple); }
+
+.modal-verse-box {
+  position: relative;
+  background: linear-gradient(135deg, rgba(155, 89, 182, 0.09), rgba(200, 169, 81, 0.05));
+  border: 1px dashed rgba(155, 89, 182, 0.4);
+  border-radius: 12px;
+  padding: 0.95rem 1rem 0.85rem 2.7rem;
+  margin: 0 0 1rem;
+}
+
+.modal-verse-icon {
+  position: absolute;
+  top: 1rem; left: 1rem;
+  color: var(--purple);
+  font-size: 1rem;
+}
+
+.modal-verse-box p {
+  font-family: var(--font-serif);
+  font-style: italic;
+  color: var(--text-main);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  margin: 0 0 0.35rem;
+}
+
+.modal-verse-box cite {
+  font-style: normal;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--purple);
+  letter-spacing: 0.5px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.modal-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #9b59b6, #8e44ad);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition), opacity var(--transition);
+}
+
+.modal-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(155, 89, 182, 0.35);
+  opacity: 0.95;
+}
+
 .modal-box h3 {
   font-family: var(--font-serif);
   color: var(--text-main);
@@ -3711,17 +3795,6 @@ nav {
   font-weight: 600;
   margin-bottom: 0.8rem;
 }
-
-.modal-box .modal-detail {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--text-secondary);
-  font-size: 0.85rem;
-  margin-bottom: 0.4rem;
-}
-
-.modal-box .modal-detail i { width: 18px; color: var(--nav-bg); }
 
 .modal-box .modal-cta {
   margin-top: 1.2rem;

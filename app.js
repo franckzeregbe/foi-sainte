@@ -532,15 +532,51 @@ function getProgrammeOnClick(ev) {
     return `onclick="showSection('priere',null)"`;
   }
   if (t.includes('étude') || t.includes('etude') || t.includes('biblique')) {
-    const h = escapeHtml(ev.heure || '');
     const ti = escapeHtml(ev.titre || '');
-    return `onclick="openModal('<div class=\\"modal-icon etude\\"><i class=\\"fa-solid fa-book-bible\\"></i></div><h3>${ti}</h3><div class=\\"modal-type\\">Étude Biblique</div><div class=\\"modal-detail\\"><i class=\\"fa-regular fa-clock\\"></i> ${h}</div><div class=\\"modal-detail\\"><i class=\\"fa-solid fa-users\\"></i> Ouvert à tous</div>')"`;
+    const h = escapeHtml(ev.heure || '');
+    const j = escapeHtml(['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi']
+      .find(d => (ev.date_text || '').includes(d)) || '');
+    return `onclick="openEtudeModal('${ti}', '${h}', '${j}')"`;
   }
   // Louange / autres → modal générique
   const h = escapeHtml(ev.heure || '');
   const ti = escapeHtml(ev.titre || '');
   const ty = escapeHtml(ev.type || '');
-  return `onclick="openModal('<div class=\\"modal-icon louange\\"><i class=\\"fa-solid fa-music\\"></i></div><h3>${ti}</h3><div class=\\"modal-type\\">${ty}</div><div class=\\"modal-detail\\"><i class=\\"fa-regular fa-clock\\"></i> ${h}</div>')"`;
+  return `onclick="openModalGeneric('${ti}', '${ty}', '${h}')"`;
+}
+
+function openEtudeModal(titre, heure, jour) {
+  const jourBadge = jour
+    ? `<div class="modal-badge"><i class="fa-regular fa-calendar"></i> ${jour}</div>` : '';
+  openModal(`
+    <div class="modal-icon etude"><i class="fa-solid fa-book-bible"></i></div>
+    <h3>${titre}</h3>
+    <div class="modal-type">Étude Biblique</div>
+    <div class="modal-badges">
+      ${jourBadge}
+      <div class="modal-badge"><i class="fa-regular fa-clock"></i> ${heure}</div>
+      <div class="modal-badge"><i class="fa-solid fa-users"></i> Ouvert à tous</div>
+    </div>
+    <div class="modal-verse-box">
+      <i class="fa-solid fa-book-open-reader modal-verse-icon"></i>
+      <p>« Ta parole est une lampe à mes pieds, et une lumière sur mon sentier. »</p>
+      <cite>— Psaume 119 : 105 —</cite>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="showSection('confessions',null);closeModal()">
+        <i class="fa-solid fa-book-bible"></i> Nos Confessions de Foi
+      </button>
+    </div>`);
+}
+
+function openModalGeneric(titre, type, heure) {
+  openModal(`
+    <div class="modal-icon louange"><i class="fa-solid fa-music"></i></div>
+    <h3>${titre}</h3>
+    <div class="modal-type">${type}</div>
+    <div class="modal-badges">
+      <div class="modal-badge"><i class="fa-regular fa-clock"></i> ${heure}</div>
+    </div>`);
 }
 
 function withYouTubeOriginParam(url) {
